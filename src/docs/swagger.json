@@ -1,0 +1,803 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Nutrition API",
+    "version": "1.0.0",
+    "description": "API for tracking daily calorie intake and managing user data"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5000",
+      "description": "Local server"
+    }
+  ],
+  "paths": {
+    "/api/users/signup": {
+      "post": {
+        "summary": "Register a new user",
+        "tags": ["Auth"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": { "type": "string" },
+                  "email": { "type": "string" },
+                  "password": { "type": "string" }
+                },
+                "required": ["username", "email", "password"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "User registered successfully" },
+          "500": { "description": "Registration failed" }
+        }
+      }
+    },
+    "/api/users/verify/{verificationToken}": {
+      "get": {
+        "summary": "Verify user email",
+        "tags": ["Auth"],
+        "parameters": [
+          {
+            "name": "verificationToken",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "Unique verification token sent to user's email"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Email verified successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string" }
+                  },
+                  "example": { "message": "Email verified successfully" }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid or expired verification token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": { "type": "string" }
+                  },
+                  "example": { "error": "Invalid or expired token" }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Verification token not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": { "type": "string" }
+                  },
+                  "example": { "error": "Token not found" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/verify": {
+      "post": {
+        "summary": "Resend verification email",
+        "tags": ["Auth"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string", "format": "email" }
+                },
+                "required": ["email"]
+              },
+              "example": { "email": "user@example.com" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Verification email resent successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string" }
+                  },
+                  "example": {
+                    "message": "Verification email resent successfully"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid or already verified email",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": { "type": "string" }
+                  },
+                  "example": { "error": "Invalid or already verified email" }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Email not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": { "type": "string" }
+                  },
+                  "example": { "error": "Email not found" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/login": {
+      "post": {
+        "summary": "User login",
+        "tags": ["Auth"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string" },
+                  "password": { "type": "string" }
+                },
+                "required": ["email", "password"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Login successful" },
+          "401": { "description": "Invalid credentials" }
+        }
+      }
+    },
+    "/api/users/logout": {
+      "post": {
+        "summary": "User logout",
+        "tags": ["Auth"],
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": { "description": "User logged out successfully" }
+        }
+      }
+    },
+    "/api/users/current": {
+      "get": {
+        "summary": "Get current logged-in user",
+        "description": "Fetches the currently authenticated user from the system.",
+        "operationId": "getCurrentUser",
+        "tags": ["Auth"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully fetched the current user details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "The ID of the user"
+                    },
+                    "username": {
+                      "type": "string",
+                      "description": "The username of the user"
+                    },
+                    "email": {
+                      "type": "string",
+                      "description": "The email of the user"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "The date and time when the user was created"
+                    },
+                    "example": {
+                      "id": "123",
+                      "username": "user123",
+                      "email": "user@example.com",
+                      "createdAt": "2024-01-01T12:00:00Z"
+                    }
+                  },
+                  "required": ["id", "username", "email", "createdAt"]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized. The user is not authenticated."
+          },
+          "500": {
+            "description": "Internal Server Error."
+          }
+        }
+      }
+    },
+    "/api/public/{height}/{desiredWeight}/{age}/{bloodGroupIndex}/{currentWeight}": {
+      "get": {
+        "summary": "Get general recommended daily calories intake based on height, desiredWeight, age, currentWeight and returnes forbiden  categories of aliments to eat based on blood group",
+        "description": "This endpoint calculates the recommended daily calorie intake based on height, desired weight, current weight, and age, and retrieves health categories based on the blood group index. It checks if the given blood group is allowed and fetches categories accordingly.",
+        "operationId": "getCategoriesForBloodGroup",
+        "parameters": [
+          {
+            "name": "height",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 170
+            },
+            "description": "The height of the individual in cm."
+          },
+          {
+            "name": "desiredWeight",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 70
+            },
+            "description": "The desired weight of the individual in kg."
+          },
+          {
+            "name": "age",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 30
+            },
+            "description": "The age of the individual."
+          },
+          {
+            "name": "bloodGroupIndex",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 2
+            },
+            "description": "The blood group index for fetching the relevant categories."
+          },
+          {
+            "name": "currentWeight",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 75
+            },
+            "description": "The current weight of the individual in kg."
+          }
+        ],
+        "tags": ["Nutrition"],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved daily calorie intake and categories for the blood group.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": "success",
+                  "recommendedDailyCaloriesIntake": 2200,
+                  "data": [
+                    { "categoryId": 1, "categoryName": "Category 1" },
+                    { "categoryId": 2, "categoryName": "Category 2" },
+                    { "categoryId": 3, "categoryName": "Category 3" },
+                    { "categoryId": 4, "categoryName": "Category 4" },
+                    { "categoryId": 5, "categoryName": "Category 5" },
+                    { "categoryId": 6, "categoryName": "Category 6" },
+                    { "categoryId": 7, "categoryName": "Category 7" }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid blood group index provided.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Invalid blood group index"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "An unexpected error occurred."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/public/products": {
+      "get": {
+        "summary": "Get all health products",
+        "description": "Fetches all products from the Health collection",
+        "operationId": "getAllHealthProducts",
+        "tags": ["Nutrition"],
+        "responses": {
+          "200": {
+            "description": "List of all health products",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "_id": {
+                        "type": "string",
+                        "example": "5d51694902b2373622ff58a3"
+                      },
+                      "categories": { "type": "string", "example": "eggs" },
+                      "weight": { "type": "number", "example": 100 },
+                      "title": {
+                        "type": "string",
+                        "example": "Chicken egg (boiled)"
+                      },
+                      "calories": { "type": "number", "example": 160 },
+                      "groupBloodNotAllowed": {
+                        "type": "array",
+                        "items": { "type": "boolean" },
+                        "example": [null, true, false, false, false]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "example": { "error": "An unexpected error occurred." }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/public/products/{name}": {
+      "get": {
+        "summary": "Search products by name",
+        "tags": ["Products"],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "eggs"
+            },
+            "description": "Name or partial name of the product to search for (e.g., 'eggs')"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of matching products",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Product"
+                  }
+                },
+                "examples": {
+                  "multipleResults": {
+                    "summary": "Multiple matching products",
+                    "value": [
+                      {
+                        "_id": "5d51694802b2373622ff5539",
+                        "categories": "eggs",
+                        "weight": 100,
+                        "title": "Chicken egg (boiled)",
+                        "calories": 160,
+                        "groupBloodNotAllowed": [
+                          null,
+                          true,
+                          false,
+                          false,
+                          false
+                        ],
+                        "__v": 0
+                      },
+                      {
+                        "_id": "5d51694802b2373622ff5540",
+                        "categories": "eggs",
+                        "weight": 150,
+                        "title": "Chicken egg (fried)",
+                        "calories": 200,
+                        "groupBloodNotAllowed": [
+                          null,
+                          false,
+                          true,
+                          false,
+                          false
+                        ],
+                        "__v": 0
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid name parameter",
+            "content": {
+              "application/json": {
+                "example": { "error": "Invalid name" }
+              }
+            }
+          },
+          "404": {
+            "description": "Product not found",
+            "content": {
+              "application/json": {
+                "example": { "error": "Product not found" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/private/{height}/{desiredWeight}/{age}/{bloodGroupIndex}/{currentWeight}": {
+      "get": {
+        "summary": "Get private recommended daily calories intake based on height, desiredWeight, age, currentWeight and returnes forbiden  categories of aliments to eat based on blood group",
+        "description": "This endpoint calculates the recommended daily calorie intake based on height, desired weight, current weight, and age, and retrieves health categories based on the blood group index. It checks if the given blood group is allowed and fetches categories accordingly.",
+        "operationId": "getPrivateCategoriesForBloodGroup",
+        "parameters": [
+          {
+            "name": "height",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 170
+            },
+            "description": "The height of the individual in cm."
+          },
+          {
+            "name": "desiredWeight",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 70
+            },
+            "description": "The desired weight of the individual in kg."
+          },
+          {
+            "name": "age",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 30
+            },
+            "description": "The age of the individual."
+          },
+          {
+            "name": "bloodGroupIndex",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 2
+            },
+            "description": "The blood group index for fetching the relevant categories."
+          },
+          {
+            "name": "currentWeight",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 75
+            },
+            "description": "The current weight of the individual in kg."
+          }
+        ],
+        "tags": ["Nutrition"],
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved daily calorie intake and categories for the blood group.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": "success",
+                  "recommendedDailyCaloriesIntake": 2200,
+                  "data": [
+                    { "categoryId": 1, "categoryName": "Category 1" },
+                    { "categoryId": 2, "categoryName": "Category 2" },
+                    { "categoryId": 3, "categoryName": "Category 3" },
+                    { "categoryId": 4, "categoryName": "Category 4" },
+                    { "categoryId": 5, "categoryName": "Category 5" },
+                    { "categoryId": 6, "categoryName": "Category 6" },
+                    { "categoryId": 7, "categoryName": "Category 7" }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid blood group index provided.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Invalid blood group index"
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "An unexpected error occurred."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/private/consumed": {
+      "post": {
+        "summary": "Add a consumed product for a day",
+        "tags": ["Consumed"],
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "product": {
+                    "type": "string",
+                    "description": "Title of the consumed product"
+                  },
+                  "date": {
+                    "type": "string",
+                    "format": "date",
+                    "description": "Date of consumption"
+                  },
+                  "quantity": {
+                    "type": "number",
+                    "description": "Quantity in grams",
+                    "example": 100
+                  }
+                },
+                "required": ["product", "date", "quantity"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Product added with quantity and calculated calories"
+          },
+          "400": { "description": "Invalid request data" },
+          "401": { "description": "Unauthorized" },
+          "404": { "description": "Product not found" },
+          "500": { "description": "Internal server error" }
+        }
+      }
+    },
+    "/api/private/consumed/{productId}/{date}": {
+      "delete": {
+        "summary": "Delete a consumed product for a specific date",
+        "tags": ["Consumed"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID of the product to delete"
+          },
+          {
+            "name": "date",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": "Date the product was consumed"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product successfully deleted"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Product not found or not consumed on the specified date"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/private/{date}": {
+      "get": {
+        "summary": "Get all information for a specific day",
+        "tags": ["Consumed"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "date",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": "Date in format YYYY-MM-DD"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Daily information",
+            "content": {
+              "application/json": {
+                "example": {
+                  "dailyCalorieIntake": 2000,
+                  "totalCaloriesConsumed": 1500,
+                  "remainingCalories": 500,
+                  "percentageCaloriesConsumed": 75,
+                  "consumedProducts": [
+                    {
+                      "product": "Product Name",
+                      "quantity": 2,
+                      "calories": 300
+                    },
+                    {
+                      "product": "Another Product",
+                      "quantity": 1,
+                      "calories": 200
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "No consumed products found for the given date"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "Product": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "example": "5d51694802b2373622ff5539",
+            "description": "Unique identifier for the product"
+          },
+          "categories": {
+            "type": "string",
+            "example": "eggs",
+            "description": "Category to which the product belongs"
+          },
+          "weight": {
+            "type": "integer",
+            "example": 100,
+            "description": "Weight of the product in grams"
+          },
+          "title": {
+            "type": "string",
+            "example": "Chicken egg (boiled)",
+            "description": "Title or name of the product"
+          },
+          "calories": {
+            "type": "integer",
+            "example": 160,
+            "description": "Calories contained in the product"
+          },
+          "groupBloodNotAllowed": {
+            "type": "array",
+            "items": {
+              "type": ["boolean", "null"],
+              "description": "Indicates blood groups for which this product is not allowed"
+            },
+            "example": [null, true, false, false, false]
+          },
+          "__v": {
+            "type": "integer",
+            "example": 0,
+            "description": "Version key for the document"
+          }
+        }
+      }
+    }
+  }
+}

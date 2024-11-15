@@ -1,0 +1,106 @@
+const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
+
+const gravatar = require("gravatar");
+
+const userSchema = new mongoose.Schema(
+  {
+    username: {
+      type: String,
+      minLength: 3,
+      required: [true, "Username required"],
+    },
+    email: {
+      type: String,
+      required: [true, "Email is required"],
+      unique: true,
+    },
+    password: {
+      type: String,
+      required: [true, "Password is required"],
+    },
+    height: {
+      type: Number,
+      default: 0,
+    },
+    desiredWeight: {
+      type: Number,
+      default: 0,
+    },
+    age: {
+      type: Number,
+      default: 0,
+    },
+    bloodType: {
+      type: Number,
+      default: 0,
+    },
+    weight: {
+      type: Number,
+      default: 0,
+    },
+    token: {
+      type: String,
+      default: null,
+    },
+    avatarURL: {
+      type: String,
+      minLength: 2,
+    },
+    verify: {
+      type: Boolean,
+      default: false,
+    },
+    verificationToken: {
+      type: String || null,
+      // required: [true, "Verify token is required"],
+    },
+    dietaryInfo: {
+      dailyCalorieIntake: {
+        type: Number,
+        required: true,
+        default: 2000,
+      },
+      restrictedAliments: [
+        {
+          categories: { type: String },
+          title: { type: String },
+          calories: { type: Number },
+          weight: { type: Number }
+          // Add other fields as necessary
+        }
+      ]
+    },
+    consumedProducts: [
+      {
+        product: { type: mongoose.Schema.Types.ObjectId, ref: "Health" },
+        date: { type: Date, required: true },
+        quantity: { type: Number, required: true },
+        calories: { type: Number, required: true }
+      }
+    ]
+  },
+  { versionKey: false, timestamps: true }
+);
+
+userSchema.methods.setPassword = function (password) {
+  this.password = bcrypt.hashSync(password, bcrypt.genSaltSync(10));
+};
+
+userSchema.methods.validPassword = function (password) {
+  return bcrypt.compareSync(password, this.password);
+};
+
+userSchema.pre("save", function (next) {
+  if (!this.avatarURL) {
+    this.avatarURL = gravatar.url(
+      this.email,
+      { s: 200, r: "pg", d: "identicon" },
+      true
+    );
+  }
+  next();
+});
+
+const User = mongoose.model("User", userSchema);
+module.exports = User;
