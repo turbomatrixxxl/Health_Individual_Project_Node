@@ -52,8 +52,8 @@ const userSchema = new mongoose.Schema(
       default: false,
     },
     verificationToken: {
-      type: String || null,
-      // required: [true, "Verify token is required"],
+      type: String,
+      default: null, // Default to null if no token is provided
     },
     dietaryInfo: {
       dailyCalorieIntake: {

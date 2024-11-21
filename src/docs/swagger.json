@@ -33,8 +33,45 @@
           }
         },
         "responses": {
-          "201": { "description": "User registered successfully" },
-          "500": { "description": "Registration failed" }
+          "201": {
+            "description": "User registered successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "user": {
+                      "type": "object",
+                      "properties": {
+                        "username": { "type": "string" },
+                        "email": { "type": "string" },
+                        "height": { "type": "number" },
+                        "desiredWeight": { "type": "number" },
+                        "age": { "type": "number" },
+                        "bloodType": { "type": "number" },
+                        "weight": { "type": "number" },
+                        "avatarURL": { "type": "string" },
+                        "verify": { "type": "boolean" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Registration failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -175,8 +212,8 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "email": { "type": "string" },
-                  "password": { "type": "string" }
+                  "email": { "type": "string", "example": "user@example.com" },
+                  "password": { "type": "string", "example": "password123" }
                 },
                 "required": ["email", "password"]
               }
@@ -184,8 +221,62 @@
           }
         },
         "responses": {
-          "200": { "description": "Login successful" },
-          "401": { "description": "Invalid credentials" }
+          "200": {
+            "description": "Login successful or user not verified",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": {
+                      "type": "string",
+                      "nullable": true,
+                      "description": "JWT token for the user if verified, null otherwise",
+                      "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    },
+                    "user": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "example": "64b5a8b3d5825e001cf7f2c1"
+                        },
+                        "name": { "type": "string", "example": "John Doe" },
+                        "email": {
+                          "type": "string",
+                          "example": "user@example.com"
+                        },
+                        "avatarURL": {
+                          "type": "string",
+                          "example": "https://example.com/avatar.png"
+                        },
+                        "verify": { "type": "boolean", "example": true }
+                      },
+                      "required": ["id", "name", "email", "avatarURL", "verify"]
+                    }
+                  },
+                  "required": ["token", "user"]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials or other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Email or password is wrong"
+                    }
+                  },
+                  "required": ["message"]
+                }
+              }
+            }
+          }
         }
       }
     },

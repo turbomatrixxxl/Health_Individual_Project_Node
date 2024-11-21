@@ -27,12 +27,6 @@ const registerUser = async (username, email, password) => {
   });
   user.setPassword(password);
 
-  const payload = { email: email };
-
-  const token = jwt.sign(payload, secret, { expiresIn: '1h' });
-
-  user.token = token;
-
   await user.save();
   return user;
 };
@@ -42,25 +36,26 @@ const loginUser = async (email, password) => {
   const user = await User.findOne({ email: email });
 
   if (!user || !user.validPassword(password)) {
-    throw new Error('Email or password is wrong');
-  }
-
-  if (!user.verify) {
-    throw new Error('Verify your email to confirm registration...!');
+    throw new Error("Email or password is wrong");
   }
 
   const payload = { id: user._id, name: user.username, email: user.email };
-  console.log(payload);
 
-  const token = jwt.sign(payload, secret, {
-    expiresIn: '1h',
-  });
+  // If the user is not verified, return the user object and set token as null
+  if (!user.verify) {
+    return { user, token: null }; // Ensure no token is issued for unverified users
+  }
+
+  // Generate a token for verified users
+  const token = jwt.sign(payload, secret, { expiresIn: "1h" });
 
   user.token = token;
   await user.save();
 
   return { token, user };
 };
+
+
 
 // Get user by ID
 const getUserById = async (userId) => {

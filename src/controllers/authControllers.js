@@ -21,14 +21,18 @@ exports.register = async (req, res, next) => {
     // console.log(newUser);
 
     res.status(201).json({
-      token: newUser.token,
       user: {
-        id: newUser._id,
+        username: newUser.username,
         email: newUser.email,
+        height: newUser.height,
+        desiredWeight: newUser.desiredWeight,
+        age: newUser.age,
+        bloodType: newUser.bloodType,
+        weight: newUser.weight,
         avatarURL: newUser.avatarURL,
-        verificationToken: newUser.verificationToken,
+        verify: newUser.verify,
       },
-    });
+    })
   } catch (error) {
     res.status(500).json({ message: error.message });
     next(error);
@@ -37,27 +41,34 @@ exports.register = async (req, res, next) => {
 
 exports.login = async (req, res) => {
   const { email, password } = req.body;
+
+  // Validate request body
   const { error } = validateUser.validate(req.body);
   if (error) {
     return res.status(400).json({ message: error.message });
   }
-  try {
-    const user = await loginUser(email, password);
 
+  try {
+    const { user, token } = await loginUser(email, password);
+
+    // Respond with the user data and token (null if unverified)
     res.status(200).json({
-      token: user.token,
+      token: token, // Null if user is not verified
       user: {
-        id: user.user._id,
-        name: user.user.username,
-        email: user.user.email,
-        avatarURL: user.user.avatarURL,
-        verify: user.user.verify,
+        id: user._id,
+        name: user.username,
+        email: user.email,
+        avatarURL: user.avatarURL,
+        verify: user.verify, // Indicates whether the email is verified
       },
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    // Handle login errors (e.g., invalid credentials)
+    res.status(401).json({ message: error.message });
   }
 };
+
+
 
 exports.logout = async (req, res, next) => {
   try {
