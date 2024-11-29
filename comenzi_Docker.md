@@ -1,12 +1,12 @@
 <!-- In terminal -->
 
-<!-- builduie containerul pentru docker -->
+<!-- builduie containerul pentru docker (!!! Nu uita sa pui spatiu si punct dupa nume si numele trebuie sa fie cu litere mici scris !!!) -->
 
-docker buld -t <nume container> .
+docker build -t numeContainer .
 
-<!-- porneste containerul de docker creat -->
+<!-- porneste containerul de docker creat (eg: docker run -p 5000:5000 raducontainer  -->
 
-docker run -p port:port nume-container
+docker run -p valoarePort:valoarePort nume-container
 
 <!-- arata containerul care ruleaza pe docker -->
 
