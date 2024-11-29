@@ -77,6 +77,7 @@ exports.addConsumedProduct = async (userId, product, date, quantity) => {
         $push: {
           consumedProducts: {
             product: productToAdd._id,
+            productName: productToAdd.title,
             date,
             quantity,
             calories: totalCalories
@@ -120,7 +121,12 @@ exports.deleteConsumedProduct = async (userId, productId, date) => {
     // Save the updated user document
     await user.save();
 
-    return { success: true, message: 'Product successfully deleted' };
+    return {
+      success: true,
+      message: 'Product successfully deleted',
+      user: user,
+      consumedProducts: user.consumedProducts
+    };
   } catch (error) {
     throw new Error(error.message || 'Failed to delete consumed product');
   }
@@ -145,9 +151,9 @@ exports.getConsumedInfoForDate = async (userId, date) => {
       return productDate >= startOfDay && productDate <= endOfDay;
     });
 
-    if (consumedProducts.length === 0) {
-      throw new Error('No consumed products found for this date');
-    }
+    // if (consumedProducts.length === 0) {
+    //   throw new Error('No consumed products found for this date');
+    // }
 
     // Calculate total calories consumed
     const totalCaloriesConsumed = consumedProducts.reduce((sum, product) => sum + product.calories, 0);

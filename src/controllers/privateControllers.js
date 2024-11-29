@@ -116,6 +116,8 @@ exports.deleteConsumedProductForUser = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: response.message,
+      consumedProducts: response.consumedProducts,
+      user: response.user
     });
   } catch (error) {
     if (error.message === 'User not found') {

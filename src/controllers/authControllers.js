@@ -54,13 +54,7 @@ exports.login = async (req, res) => {
     // Respond with the user data and token (null if unverified)
     res.status(200).json({
       token: token, // Null if user is not verified
-      user: {
-        id: user._id,
-        name: user.username,
-        email: user.email,
-        avatarURL: user.avatarURL,
-        verify: user.verify, // Indicates whether the email is verified
-      },
+      user: user,
     });
   } catch (error) {
     // Handle login errors (e.g., invalid credentials)

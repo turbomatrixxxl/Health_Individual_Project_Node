@@ -73,6 +73,10 @@ const userSchema = new mongoose.Schema(
     },
     consumedProducts: [
       {
+        productName: {
+          type: String,
+          default: ""
+        },
         product: { type: mongoose.Schema.Types.ObjectId, ref: "Health" },
         date: { type: Date, required: true },
         quantity: { type: Number, required: true },
