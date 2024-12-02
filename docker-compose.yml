@@ -1,0 +1,8 @@
+version: '3.8'
+
+services:
+  backend:
+    image: health
+    ports:
+      - '5000:5000' # Mapare port container -> gazdă
+    restart: always # Repornire automată în caz de eroare
