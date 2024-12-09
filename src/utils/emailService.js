@@ -3,6 +3,7 @@ const { v4: uuidv4 } = require('uuid');
 
 require('dotenv').config();
 
+// eslint-disable-next-line no-undef
 const senderEmail = process.env.SECRET_EMAIL;
 
 const sendVerificationEmail = async (email) => {
