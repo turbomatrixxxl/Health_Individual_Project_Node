@@ -8,7 +8,7 @@ const senderEmail = process.env.SECRET_EMAIL;
 
 const sendVerificationEmail = async (email) => {
   const verificationToken = uuidv4();
-  const verificationUrl = `http://localhost:5000/api/users/verify/${verificationToken}`;
+  const verificationUrl = `https://health-individual-project-node.onrender.com/api/users/verify/${verificationToken}`;
 
   if (!senderEmail) throw new Error('Sender email is missing.');
 
