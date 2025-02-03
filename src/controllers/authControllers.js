@@ -32,7 +32,7 @@ exports.register = async (req, res, next) => {
         avatarURL: newUser.avatarURL,
         verify: newUser.verify,
       },
-    })
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
     next(error);
@@ -61,8 +61,6 @@ exports.login = async (req, res) => {
     res.status(401).json({ message: error.message });
   }
 };
-
-
 
 exports.logout = async (req, res, next) => {
   try {
@@ -143,7 +141,16 @@ exports.verifyUserEmail = async (req, res) => {
   try {
     await verifyUserEmail(verificationToken);
 
-    res.status(200).json({ message: 'User successfully verified', code: 200 });
+    res.setHeader('Content-Type', 'text/html');
+    console.log(
+      'Redirecting to:',
+      'https://turbomatrixxxl.github.io/Health_Individual_Project_React/'
+    );
+
+    return res.redirect(
+      302,
+      'https://turbomatrixxxl.github.io/Health_Individual_Project_React/'
+    );
   } catch (error) {
     res
       .status(404)
