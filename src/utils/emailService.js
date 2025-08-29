@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 // const sgMail = require('@sendgrid/mail');
 // const { v4: uuidv4 } = require('uuid');
 
@@ -38,7 +39,9 @@ const { v4: uuidv4 } = require('uuid');
 
 require('dotenv').config();
 
-// eslint-disable-next-line no-undef
+// console.log('SECRET_EMAIL:', process.env.SECRET_EMAIL);
+// console.log('GMAIL_APP_PASSWORD:', process.env.GMAIL_APP_PASSWORD);
+
 const senderEmail = process.env.SECRET_EMAIL;
 const senderPass = process.env.GMAIL_APP_PASSWORD; // parola de aplicație Gmail
 
