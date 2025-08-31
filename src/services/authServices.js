@@ -36,7 +36,7 @@ const loginUser = async (email, password) => {
   const user = await User.findOne({ email: email });
 
   if (!user || !user.validPassword(password)) {
-    throw new Error("Email or password is wrong");
+    throw new Error('Email or password is wrong');
   }
 
   const payload = { id: user._id, name: user.username, email: user.email };
@@ -47,15 +47,13 @@ const loginUser = async (email, password) => {
   }
 
   // Generate a token for verified users
-  const token = jwt.sign(payload, secret, { expiresIn: "1h" });
+  const token = jwt.sign(payload, secret, { expiresIn: '1h' });
 
   user.token = token;
   await user.save();
 
   return { token, user };
 };
-
-
 
 // Get user by ID
 const getUserById = async (userId) => {
@@ -129,6 +127,23 @@ const resendVerificationEmail = async (email) => {
   return { message: 'Verification email sent' };
 };
 
+const updateUser = async (userId, fields) => {
+  try {
+    const user = await User.findOne({ _id: userId });
+
+    if (!user) {
+      throw new Error(`User with id ${userId} not exists!`);
+    }
+
+    return await User.findByIdAndUpdate({ _id: userId }, fields, {
+      new: true,
+    });
+  } catch (error) {
+    console.log(error.message);
+    throw error;
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
@@ -136,4 +151,5 @@ module.exports = {
   logoutUser,
   verifyUserEmail,
   resendVerificationEmail,
+  updateUser,
 };

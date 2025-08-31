@@ -5,11 +5,16 @@ const {
   logoutUser,
   verifyUserEmail,
   resendVerificationEmail,
+  updateUser,
 } = require('../services/authServices');
 
 const { validateUser } = require('../middlewares/validationMiddleware');
 
 const { extractUserId } = require('../middlewares/extractUserId');
+
+// const path = require('path');
+
+const bcrypt = require('bcryptjs');
 
 const Joi = require('joi');
 
@@ -191,5 +196,89 @@ exports.handleResendVerificationEmail = async (req, res) => {
         .json({ message: 'Verification has already been passed' });
     }
     return res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+exports.updateUserInfo = async (req, res, next) => {
+  const { username, email, password } = req.body;
+
+  try {
+    const authHeader = req.headers.authorization;
+    // console.log(authHeader);
+
+    if (!authHeader) {
+      // Dacă antetul "Authorization" lipsește, returnați o eroare de autentificare
+      return res
+        .status(401)
+        .json({ status: 'error', message: 'Missing Authorization header' });
+    }
+
+    const userId = extractUserId(authHeader);
+
+    // Hash the password if a new password is provided
+    const updateFields = { username, email };
+
+    if (password) {
+      const hashedPassword = bcrypt.hashSync(password, bcrypt.genSaltSync(10));
+      updateFields.password = hashedPassword;
+    }
+
+    // Call the service to update user information
+    const updatedUser = await updateUser(userId, updateFields);
+
+    if (!updatedUser) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'User not found',
+      });
+    }
+
+    // If the update is successful, return the updated user data
+    res.status(200).json({
+      status: 'success',
+      code: 200,
+      data: { user: updatedUser },
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 'error',
+      message: error.message,
+    });
+    next(error);
+  }
+};
+
+exports.updateUseravatar = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(404).json({ error: 'There is no file to upload!' });
+    }
+
+    // Log file details to verify it's being received correctly
+    console.log('Received file:', req.file);
+
+    // Use the Cloudinary URL directly from Multer
+    const cloudinaryUrl = req.file.path; // Multer will provide the secure URL
+
+    // Update fields with Cloudinary URL
+    const updateFields = { avatarURL: cloudinaryUrl };
+
+    // Update user in the database
+    const updatedUser = await updateUser(req.user._id, updateFields, {
+      new: true,
+    });
+
+    // Send success response
+    res.status(200).json({
+      avatarUrl: updatedUser.avatarURL,
+    });
+  } catch (error) {
+    console.error('Error in uploading avatar:', error.message);
+    res.status(500).json({
+      status: 'fail',
+      code: 500,
+      message: error.message,
+      data: 'Internal Server Error',
+    });
   }
 };
