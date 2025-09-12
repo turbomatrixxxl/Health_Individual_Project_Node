@@ -8,7 +8,7 @@ const passport = require('./passport/passportConfig');
 const cors = require('cors');
 const corsOptions = require('./cors');
 
-const usersRouter = require('./routes/api/authRoutes');
+const authRouter = require('./routes/api/authRoutes');
 const privateRouter = require('./routes/api/privateRoutes');
 const healthRouter = require('./routes/api/healthRoutes');
 
@@ -38,7 +38,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-app.use('/api', usersRouter);
+app.use('/api', authRouter);
 app.use('/api', privateRouter);
 app.use('/api', healthRouter);
 

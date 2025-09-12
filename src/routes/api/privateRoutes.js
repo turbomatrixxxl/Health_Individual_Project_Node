@@ -11,13 +11,48 @@ router.get(
 );
 
 // POST /api/private/consumed - Add a consumed product for a day
-router.post("/private/consumed", authMiddleware, privateController.addConsumedProduct);
+router.post(
+  '/private/consumed',
+  authMiddleware,
+  privateController.addConsumedProduct
+);
 
 // Define the route for deleting a consumed product for a specific user
-router.delete('/private/consumed/:productId/:date', authMiddleware, privateController.deleteConsumedProductForUser);
+router.delete(
+  '/private/consumed/:productId/:date',
+  authMiddleware,
+  privateController.deleteConsumedProductForUser
+);
 
 // Define the route for getting consumed products' information for a specific day
-router.get('/private/:date', authMiddleware, privateController.getConsumedInfoForSpecificDay);
+router.get(
+  '/private/:date',
+  authMiddleware,
+  privateController.getConsumedInfoForSpecificDay
+);
 
+router.post(
+  '/private/steps',
+  authMiddleware,
+  privateController.setPrivateStepsDailyRegistrations
+);
+
+router.post(
+  '/private/sleep',
+  authMiddleware,
+  privateController.setPrivateSleepDailyRegistrations
+);
+
+router.post(
+  '/private/heart',
+  authMiddleware,
+  privateController.setPrivateHeartDailyRegistrations
+);
+
+router.post(
+  '/private/reminders',
+  authMiddleware,
+  privateController.addEditPrivateReminder
+);
 
 module.exports = router;

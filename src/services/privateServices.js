@@ -10,6 +10,9 @@ exports.getCategoriesForBloodGroup = async (
   bloodGroupIndex,
   weight
 ) => {
+  if (age < 0 || height < 0 || desiredWeight < 0 || weight < 0) {
+    return;
+  }
   try {
     // Find all categories where groupBloodNotAllowed[bloodGroupIndex] is false
     const result = await Health.find({
@@ -29,7 +32,9 @@ exports.getCategoriesForBloodGroup = async (
       {
         $set: {
           'dietaryInfo.restrictedAliments': restrictedAlimentsData,
-          'dietaryInfo.dailyCalorieIntake': Math.round(recommendedDailyCaloriesIntake),
+          'dietaryInfo.dailyCalorieIntake': Math.round(
+            recommendedDailyCaloriesIntake
+          ),
           height: height,
           desiredWeight: desiredWeight,
           age: age,
@@ -49,10 +54,10 @@ exports.getCategoriesForBloodGroup = async (
 
 exports.addConsumedProduct = async (userId, product, date, quantity) => {
   try {
-    const productToAdd = await Health.findOne({ title: product })
+    const productToAdd = await Health.findOne({ title: product });
 
     if (!productToAdd) {
-      throw new Error('Eroor finding product !')
+      throw new Error('Eroor finding product !');
     }
 
     const userToUpdate = await User.findById(userId);
@@ -80,9 +85,9 @@ exports.addConsumedProduct = async (userId, product, date, quantity) => {
             productName: productToAdd.title,
             date,
             quantity,
-            calories: totalCalories
-          }
-        }
+            calories: totalCalories,
+          },
+        },
       },
       { new: true }
     );
@@ -91,7 +96,7 @@ exports.addConsumedProduct = async (userId, product, date, quantity) => {
       message: isForbidden
         ? 'This product is not recommended for your blood type.'
         : 'This product is recommended for your blood type.',
-      user: user
+      user: user,
     };
   } catch (error) {
     throw new Error(`Error adding consumed product: ${error.message}`);
@@ -108,7 +113,9 @@ exports.deleteConsumedProduct = async (userId, productId, date) => {
 
     // Find the product in the consumedProducts array for the specified date
     const productIndex = user.consumedProducts.findIndex(
-      (product) => product.product.toString() === productId && product.date.toISOString().split('T')[0] === date
+      (product) =>
+        product.product.toString() === productId &&
+        product.date.toISOString().split('T')[0] === date
     );
 
     if (productIndex === -1) {
@@ -125,7 +132,7 @@ exports.deleteConsumedProduct = async (userId, productId, date) => {
       success: true,
       message: 'Product successfully deleted',
       user: user,
-      consumedProducts: user.consumedProducts
+      consumedProducts: user.consumedProducts,
     };
   } catch (error) {
     throw new Error(error.message || 'Failed to delete consumed product');
@@ -156,19 +163,27 @@ exports.getConsumedInfoForDate = async (userId, date) => {
     // }
 
     // Calculate total calories consumed
-    const totalCaloriesConsumed = consumedProducts.reduce((sum, product) => sum + product.calories, 0);
+    const totalCaloriesConsumed = consumedProducts.reduce(
+      (sum, product) => sum + product.calories,
+      0
+    );
 
     // Calculate remaining calories
-    const remainingCalories = Math.round(user.dietaryInfo.dailyCalorieIntake) - totalCaloriesConsumed;
+    const remainingCalories =
+      Math.round(user.dietaryInfo.dailyCalorieIntake) - totalCaloriesConsumed;
 
     // Calculate percentage of calories consumed
-    const percentageCaloriesConsumed = Math.round((totalCaloriesConsumed / Math.round(user.dietaryInfo.dailyCalorieIntake)) * 100);
+    const percentageCaloriesConsumed = Math.round(
+      (totalCaloriesConsumed /
+        Math.round(user.dietaryInfo.dailyCalorieIntake)) *
+        100
+    );
 
     // Function to find product name by ID
     const findProductById = async (id) => {
       const product = await Health.findById(id);
 
-      return product ? product.title : 'Unknown Product';  // Return product title or a default if not found
+      return product ? product.title : 'Unknown Product'; // Return product title or a default if not found
     };
 
     // Use Promise.all to resolve all product name promises
@@ -192,6 +207,162 @@ exports.getConsumedInfoForDate = async (userId, date) => {
       consumedProducts: consumedProductsWithNames,
     };
   } catch (error) {
-    throw new Error(error.message || 'Failed to fetch consumed products for the specified date');
+    throw new Error(
+      error.message ||
+        'Failed to fetch consumed products for the specified date'
+    );
+  }
+};
+
+exports.setStepsDailyRegistrations = async (userId, totalSteps) => {
+  try {
+    // Find the user
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const todaySteps = user.steps.find((step) => {
+      const stepsDate = new Date(step.date);
+      stepsDate.setHours(0, 0, 0, 0);
+      return today.getTime() === stepsDate.getTime();
+    });
+
+    if (!todaySteps) {
+      user.steps.push({ quantity: totalSteps, date: new Date() });
+    } else {
+      todaySteps.quantity = totalSteps;
+    }
+
+    await user.save();
+
+    return user;
+  } catch (error) {
+    throw new Error(error.message || 'Failed to set Steps for today !');
+  }
+};
+
+exports.setSleepDailyRegistrations = async (userId, hours) => {
+  try {
+    // Find the user
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const todaySleep = user.sleep.find((sl) => {
+      const sleepDate = new Date(sl.date);
+      sleepDate.setHours(0, 0, 0, 0);
+      return today.getTime() === sleepDate.getTime();
+    });
+
+    if (!todaySleep) {
+      user.sleep.push({ quantity: hours, date: new Date() });
+    } else {
+      todaySleep.quantity = hours;
+    }
+
+    await user.save();
+
+    return user;
+  } catch (error) {
+    throw new Error(error.message || 'Failed to set Sleep hours for today !');
+  }
+};
+
+exports.setHeartDailyRegistrations = async (
+  userId,
+  systolic,
+  diastolic,
+  pulse
+) => {
+  try {
+    // Find the user
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const todayHeart = user.heart.find((sl) => {
+      const heartDate = new Date(sl.date);
+      heartDate.setHours(0, 0, 0, 0);
+      return today.getTime() === heartDate.getTime();
+    });
+
+    if (!todayHeart) {
+      user.heart.push({
+        systolic: systolic,
+        diastolic: diastolic,
+        pulse: pulse,
+        date: new Date(),
+      });
+    } else {
+      todayHeart.systolic = systolic;
+      todayHeart.diastolic = diastolic;
+      todayHeart.pulse = pulse;
+    }
+
+    await user.save();
+
+    return user;
+  } catch (error) {
+    throw new Error(error.message || 'Failed to set Heart Metrix for today !');
+  }
+};
+
+exports.addEditReminder = async (
+  userId,
+  id,
+  text,
+  time,
+  frequency,
+  repeat,
+  end,
+  type,
+  active,
+  done
+) => {
+  try {
+    const user = await User.findById(userId);
+    if (!user) throw new Error('User not found');
+
+    if (!id) {
+      user.reminders.push({
+        text,
+        time,
+        frequency,
+        repeat,
+        end,
+        type,
+        active,
+        done,
+      });
+    } else {
+      const reminder = user.reminders.find((rem) => rem._id.toString() === id);
+      if (!reminder) throw new Error('Failed to find Reminder !');
+
+      reminder.text = text;
+      reminder.time = time;
+      reminder.frequency = frequency;
+      reminder.repeat = repeat;
+      reminder.end = end;
+      reminder.type = type;
+      reminder.active = active;
+      reminder.done = done;
+    }
+
+    await user.save();
+    return user;
+  } catch (error) {
+    throw new Error(error.message || 'Failed to add/edit reminder !');
   }
 };

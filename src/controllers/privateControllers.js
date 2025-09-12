@@ -1,4 +1,13 @@
-const { getCategoriesForBloodGroup, addConsumedProduct, deleteConsumedProduct, getConsumedInfoForDate } = require('../services/privateServices');
+const {
+  getCategoriesForBloodGroup,
+  addConsumedProduct,
+  deleteConsumedProduct,
+  getConsumedInfoForDate,
+  setStepsDailyRegistrations,
+  setSleepDailyRegistrations,
+  setHeartDailyRegistrations,
+  addEditReminder,
+} = require('../services/privateServices');
 const { extractUserId } = require('../middlewares/extractUserId');
 
 exports.getPrivateCategoriesForBloodGroup = async (req, res, next) => {
@@ -69,7 +78,8 @@ exports.addConsumedProduct = async (req, res, next) => {
     if (!product || !date || !quantity || quantity <= 0) {
       return res.status(400).json({
         status: 'error',
-        message: 'Invalid input. Please provide product, date, and a valid quantity.'
+        message:
+          'Invalid input. Please provide product, date, and a valid quantity.',
       });
     }
 
@@ -78,19 +88,24 @@ exports.addConsumedProduct = async (req, res, next) => {
     if (!authHeader) {
       return res.status(401).json({
         status: 'error',
-        message: 'Missing Authorization header'
+        message: 'Missing Authorization header',
       });
     }
 
     const userId = extractUserId(authHeader); // Assuming this utility extracts user ID from token
 
     // Call the service to add the consumed product
-    const updatedUser = await addConsumedProduct(userId, product, date, quantity);
+    const updatedUser = await addConsumedProduct(
+      userId,
+      product,
+      date,
+      quantity
+    );
 
     return res.status(200).json({
       status: 'success',
       message: updatedUser.message,
-      data: updatedUser.user
+      data: updatedUser.user,
     });
   } catch (error) {
     next(error);
@@ -105,7 +120,7 @@ exports.deleteConsumedProductForUser = async (req, res) => {
     if (!authHeader) {
       return res.status(401).json({
         status: 'error',
-        message: 'Missing Authorization header'
+        message: 'Missing Authorization header',
       });
     }
 
@@ -117,7 +132,7 @@ exports.deleteConsumedProductForUser = async (req, res) => {
       success: true,
       message: response.message,
       consumedProducts: response.consumedProducts,
-      user: response.user
+      user: response.user,
     });
   } catch (error) {
     if (error.message === 'User not found') {
@@ -147,7 +162,7 @@ exports.getConsumedInfoForSpecificDay = async (req, res) => {
     if (!authHeader) {
       return res.status(401).json({
         status: 'error',
-        message: 'Missing Authorization header'
+        message: 'Missing Authorization header',
       });
     }
 
@@ -172,9 +187,181 @@ exports.getConsumedInfoForSpecificDay = async (req, res) => {
     }
     return res.status(500).json({
       success: false,
-      message: error.message || 'An error occurred while fetching consumed product data',
+      message:
+        error.message ||
+        'An error occurred while fetching consumed product data',
     });
   }
 };
 
+exports.setPrivateStepsDailyRegistrations = async (req, res, next) => {
+  try {
+    const { totalSteps } = req.body;
 
+    // Validate input
+    if (!totalSteps || totalSteps < 0) {
+      return res.status(400).json({
+        status: 'error',
+        message:
+          'Invalid input. Please provide total steps and a valid quantity.',
+      });
+    }
+
+    // Get the user ID from the request (assuming JWT authentication)
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+      return res.status(401).json({
+        status: 'error',
+        message: 'Missing Authorization header',
+      });
+    }
+
+    const userId = extractUserId(authHeader); // Assuming this utility extracts user ID from token
+
+    // Call the service to add the consumed product
+    const updatedUser = await setStepsDailyRegistrations(userId, totalSteps);
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'Steps updated for today!',
+      user: updatedUser,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.setPrivateSleepDailyRegistrations = async (req, res, next) => {
+  try {
+    const { hours } = req.body;
+
+    // Validate input
+    if (!hours || hours < 0) {
+      return res.status(400).json({
+        status: 'error',
+        message:
+          'Invalid input. Please provide total sleep hours and a valid quantity.',
+      });
+    }
+
+    // Get the user ID from the request (assuming JWT authentication)
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+      return res.status(401).json({
+        status: 'error',
+        message: 'Missing Authorization header',
+      });
+    }
+
+    const userId = extractUserId(authHeader); // Assuming this utility extracts user ID from token
+
+    // Call the service to add the consumed product
+    const updatedUser = await setSleepDailyRegistrations(userId, hours);
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'Sleep hours updated for today!',
+      user: updatedUser,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.setPrivateHeartDailyRegistrations = async (req, res, next) => {
+  try {
+    const { systolic, diastolic, pulse } = req.body;
+
+    // Validate input
+    if (
+      !systolic ||
+      systolic < 0 ||
+      !diastolic ||
+      diastolic < 0 ||
+      !pulse ||
+      pulse < 0
+    ) {
+      return res.status(400).json({
+        status: 'error',
+        message:
+          'Invalid input. Please provide systolic, diastolic, and pulse with valid positive values.',
+      });
+    }
+
+    // Get the user ID from the request (assuming JWT authentication)
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+      return res.status(401).json({
+        status: 'error',
+        message: 'Missing Authorization header',
+      });
+    }
+
+    const userId = extractUserId(authHeader); // Assuming this utility extracts user ID from token
+
+    // Call the service to add the consumed product
+    const updatedUser = await setHeartDailyRegistrations(
+      userId,
+      systolic,
+      diastolic,
+      pulse
+    );
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'Heart Metrix updated for today!',
+      user: updatedUser,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.addEditPrivateReminder = async (req, res, next) => {
+  try {
+    const { id, text, time, frequency, repeat, end, type, active, done } =
+      req.body;
+
+    // Validate input
+    if (!text || !time || !frequency || !type) {
+      return res.status(400).json({
+        status: 'error',
+        message:
+          'Invalid input. Please provide text, alert, frequency and time for this reminder.',
+      });
+    }
+
+    // Get the user ID from the request (assuming JWT authentication)
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+      return res.status(401).json({
+        status: 'error',
+        message: 'Missing Authorization header',
+      });
+    }
+
+    const userId = extractUserId(authHeader); // Assuming this utility extracts user ID from token
+
+    // Call the service to add the consumed product
+    const updatedUser = await addEditReminder(
+      userId,
+      id,
+      text,
+      time,
+      frequency,
+      repeat,
+      end,
+      type,
+      active,
+      done
+    );
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'Reminder added or updated successfully!',
+      user: updatedUser,
+    });
+  } catch (error) {
+    next(error);
+  }
+};

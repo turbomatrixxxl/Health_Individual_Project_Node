@@ -1020,6 +1020,138 @@
           }
         }
       }
+    },
+    "/api/private/steps": {
+      "post": {
+        "summary": "Set daily steps for the user",
+        "tags": ["Steps"],
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "totalSteps": {
+                    "type": "number",
+                    "description": "Total number of steps for today",
+                    "example": 5000
+                  }
+                },
+                "required": ["totalSteps"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Daily steps updated successfully" },
+          "400": { "description": "Invalid input" },
+          "401": { "description": "Unauthorized" },
+          "500": { "description": "Internal server error" }
+        }
+      }
+    },
+    "/api/private/sleep": {
+      "post": {
+        "summary": "Set daily sleep hours for the user",
+        "tags": ["Sleep"],
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "hours": {
+                    "type": "number",
+                    "description": "Number of hours slept today",
+                    "example": 8
+                  }
+                },
+                "required": ["hours"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Daily sleep hours updated successfully" },
+          "400": { "description": "Invalid input" },
+          "401": { "description": "Unauthorized" },
+          "500": { "description": "Internal server error" }
+        }
+      }
+    },
+    "/api/private/heart": {
+      "post": {
+        "summary": "Set daily heart metrics for the user",
+        "tags": ["Heart"],
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "systolic": { "type": "number", "example": 120 },
+                  "diastolic": { "type": "number", "example": 80 },
+                  "pulse": { "type": "number", "example": 70 }
+                },
+                "required": ["systolic", "diastolic", "pulse"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Daily heart metrics updated successfully" },
+          "400": { "description": "Invalid input" },
+          "401": { "description": "Unauthorized" },
+          "500": { "description": "Internal server error" }
+        }
+      }
+    },
+    "/api/private/reminders": {
+      "post": {
+        "summary": "Add or edit a reminder for the user",
+        "tags": ["Reminders"],
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "ID of reminder for editing, omit for new reminder"
+                  },
+                  "text": { "type": "string", "example": "Take breakfast" },
+                  "time": { "type": "string", "example": "06:00" },
+                  "frequency": {
+                    "type": ["string", "array"],
+                    "example": "daily"
+                  },
+                  "repeat": { "type": "string", "example": "noRepeat" },
+                  "end": { "type": "string", "example": "10:00" },
+                  "type": { "type": "string", "example": "meal" },
+                  "active": { "type": "boolean", "example": false },
+                  "done": { "type": "boolean", "example": false }
+                },
+                "required": ["text", "time"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Reminder added or updated successfully" },
+          "400": { "description": "Invalid input" },
+          "401": { "description": "Unauthorized" },
+          "500": { "description": "Internal server error" }
+        }
+      }
     }
   },
   "components": {
@@ -1062,8 +1194,9 @@
           "groupBloodNotAllowed": {
             "type": "array",
             "items": {
-              "type": ["boolean", "null"],
-              "description": "Indicates blood groups for which this product is not allowed"
+              "type": "boolean",
+              "description": "Indicates blood groups for which this product is not allowed",
+              "nullable": true
             },
             "example": [null, true, false, false, false]
           },
@@ -1071,6 +1204,141 @@
             "type": "integer",
             "example": 0,
             "description": "Version key for the document"
+          }
+        }
+      },
+      "Reminder": {
+        "type": "object",
+        "description": "Stores reminder information such as meals, sleep, activities or custom alerts.",
+        "properties": {
+          "_id": { "type": "string", "example": "64c3f83b91a2f9e7b5a6d123" },
+          "text": { "type": "string", "example": "Take breakfast" },
+          "description": {
+            "type": "string",
+            "example": "Morning meal reminder to start the day with energy"
+          },
+          "time": { "type": "string", "example": "06:00" },
+          "end": { "type": "string", "example": "10:00" },
+          "repeat": { "type": "string", "example": "noRepeat" },
+          "type": { "type": "string", "example": "meal" },
+          "active": { "type": "boolean", "example": false },
+          "done": { "type": "boolean", "example": false },
+          "frequency": {
+            "type": ["string", "array"],
+            "example": "daily"
+          },
+          "link": { "type": "string", "example": "/diary" }
+        }
+      },
+      "Step": {
+        "type": "object",
+        "description": "Tracks the number of steps taken by a user on a specific date.",
+        "properties": {
+          "quantity": { "type": "integer", "example": 5000 },
+          "date": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-09-12T08:00:00Z"
+          }
+        }
+      },
+      "Sleep": {
+        "type": "object",
+        "description": "Represents the sleep duration in hours logged by a user.",
+        "properties": {
+          "quantity": { "type": "integer", "example": 8 },
+          "date": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-09-11T23:00:00Z"
+          }
+        }
+      },
+      "Heart": {
+        "type": "object",
+        "description": "Stores heart health data including blood pressure and pulse measurements.",
+        "properties": {
+          "systolic": { "type": "integer", "example": 120 },
+          "diastolic": { "type": "integer", "example": 80 },
+          "pulse": { "type": "integer", "example": 70 },
+          "date": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-09-12T07:30:00Z"
+          }
+        }
+      },
+      "ConsumedProduct": {
+        "type": "object",
+        "description": "Represents a consumed food product, its nutritional data, and the consumption date.",
+        "properties": {
+          "productName": { "type": "string", "example": "Boiled Egg" },
+          "product": {
+            "type": "string",
+            "example": "5d51694802b2373622ff5539"
+          },
+          "date": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-09-12T07:30:00Z"
+          },
+          "quantity": { "type": "integer", "example": 2 },
+          "calories": { "type": "integer", "example": 160 }
+        }
+      },
+      "User": {
+        "type": "object",
+        "description": "Main user entity storing account details, health data and reminders.",
+        "properties": {
+          "_id": { "type": "string", "example": "64c3f83b91a2f9e7b5a6d001" },
+          "username": { "type": "string", "example": "johndoe" },
+          "email": { "type": "string", "example": "john@example.com" },
+          "password": { "type": "string", "example": "hashedPassword123" },
+          "height": { "type": "integer", "example": 180 },
+          "desiredWeight": { "type": "integer", "example": 75 },
+          "age": { "type": "integer", "example": 30 },
+          "bloodType": { "type": "integer", "example": 2 },
+          "weight": { "type": "integer", "example": 80 },
+          "avatarURL": {
+            "type": "string",
+            "example": "https://www.gravatar.com/avatar/example"
+          },
+          "verify": { "type": "boolean", "example": false },
+          "dietaryInfo": {
+            "type": "object",
+            "description": "Contains dietary restrictions and daily calorie intake settings.",
+            "properties": {
+              "dailyCalorieIntake": { "type": "integer", "example": 2000 },
+              "restrictedAliments": {
+                "type": "array",
+                "items": { "$ref": "#/components/schemas/Product" }
+              }
+            }
+          },
+          "consumedProducts": {
+            "type": "array",
+            "description": "List of products consumed by the user.",
+            "items": { "$ref": "#/components/schemas/ConsumedProduct" }
+          },
+          "steps": {
+            "type": "array",
+            "description": "List of recorded steps per day.",
+            "items": { "$ref": "#/components/schemas/Step" }
+          },
+          "sleep": {
+            "type": "array",
+            "description": "List of recorded sleep periods.",
+            "items": { "$ref": "#/components/schemas/Sleep" }
+          },
+          "heart": {
+            "type": "array",
+            "description": "List of heart health metrics.",
+            "items": { "$ref": "#/components/schemas/Heart" }
+          },
+          "reminders": {
+            "type": "array",
+            "description": "List of reminders configured or assigned to the user.",
+            "items": { "$ref": "#/components/schemas/Reminder" }
           }
         }
       }
