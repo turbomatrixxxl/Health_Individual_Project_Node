@@ -55,4 +55,10 @@ router.post(
   privateController.addEditPrivateReminder
 );
 
+router.delete(
+  '/private/consumed/:id',
+  authMiddleware,
+  privateController.deletePrivateReminder
+);
+
 module.exports = router;

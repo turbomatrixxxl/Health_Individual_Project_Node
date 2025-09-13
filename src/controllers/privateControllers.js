@@ -7,6 +7,7 @@ const {
   setSleepDailyRegistrations,
   setHeartDailyRegistrations,
   addEditReminder,
+  deleteReminder,
 } = require('../services/privateServices');
 const { extractUserId } = require('../middlewares/extractUserId');
 
@@ -342,7 +343,6 @@ exports.addEditPrivateReminder = async (req, res, next) => {
 
     const userId = extractUserId(authHeader); // Assuming this utility extracts user ID from token
 
-    // Call the service to add the consumed product
     const updatedUser = await addEditReminder(
       userId,
       id,
@@ -359,6 +359,42 @@ exports.addEditPrivateReminder = async (req, res, next) => {
     return res.status(200).json({
       status: 'success',
       message: 'Reminder added or updated successfully!',
+      user: updatedUser,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.deletePrivateReminder = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    // Validate input
+    if (!id) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Invalid Reminder Id ! The reminder was not deleted !',
+      });
+    }
+
+    // Get the user ID from the request (assuming JWT authentication)
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+      return res.status(401).json({
+        status: 'error',
+        message: 'Missing Authorization header',
+      });
+    }
+
+    const userId = extractUserId(authHeader); // Assuming this utility extracts user ID from token
+
+    // Call the service to add the consumed product
+    const updatedUser = await deleteReminder(userId, id);
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'Reminder deleted succesfully!',
       user: updatedUser,
     });
   } catch (error) {

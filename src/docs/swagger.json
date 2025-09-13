@@ -1152,6 +1152,30 @@
           "500": { "description": "Internal server error" }
         }
       }
+    },
+    "/api/private/reminders/{id}": {
+      "delete": {
+        "summary": "Delete a reminder for the user",
+        "tags": ["Reminders"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID of the reminder to delete"
+          }
+        ],
+        "responses": {
+          "200": { "description": "Reminder deleted successfully" },
+          "400": { "description": "Invalid id" },
+          "401": { "description": "Unauthorized" },
+          "500": { "description": "Internal server error" }
+        }
+      }
     }
   },
   "components": {

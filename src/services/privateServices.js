@@ -366,3 +366,17 @@ exports.addEditReminder = async (
     throw new Error(error.message || 'Failed to add/edit reminder !');
   }
 };
+
+exports.deleteReminder = async (userId, id) => {
+  try {
+    const user = await User.findById(userId);
+    if (!user) throw new Error('User not found');
+
+    user.reminders.filter((rem) => rem._id.toString() !== id);
+
+    await user.save();
+    return user;
+  } catch (error) {
+    throw new Error(error.message || 'Failed to delete reminder !');
+  }
+};
