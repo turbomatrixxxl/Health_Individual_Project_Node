@@ -374,7 +374,7 @@ exports.deletePrivateReminder = async (req, res, next) => {
     if (!id) {
       return res.status(400).json({
         status: 'error',
-        message: 'Invalid Reminder Id ! The reminder was not deleted !',
+        message: 'No Reminder Id !',
       });
     }
 
