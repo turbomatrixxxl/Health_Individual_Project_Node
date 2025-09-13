@@ -56,7 +56,7 @@ router.post(
 );
 
 router.delete(
-  '/private/consumed/:id',
+  '/private/reminders/:id',
   authMiddleware,
   privateController.deletePrivateReminder
 );
