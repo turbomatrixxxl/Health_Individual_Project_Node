@@ -337,7 +337,7 @@ exports.addEditReminder = async (
     const user = await User.findById(userId);
     if (!user) throw new Error('User not found');
 
-    const today = moment().format('YYYY-MM-DD');
+    const today = moment().local().format('YYYY-MM-DD');
 
     if (!id) {
       // Reminder nou
