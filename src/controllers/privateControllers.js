@@ -321,8 +321,18 @@ exports.setPrivateHeartDailyRegistrations = async (req, res, next) => {
 
 exports.addEditPrivateReminder = async (req, res, next) => {
   try {
-    const { id, text, time, frequency, repeat, end, type, active, done } =
-      req.body;
+    const {
+      id,
+      text,
+      time,
+      frequency,
+      repeat,
+      end,
+      type,
+      active,
+      done,
+      doneDates,
+    } = req.body;
 
     // Validate input
     if (!text || !time || !frequency || !type) {
@@ -342,7 +352,7 @@ exports.addEditPrivateReminder = async (req, res, next) => {
       });
     }
 
-    const userId = extractUserId(authHeader); // Assuming this utility extracts user ID from token
+    const userId = extractUserId(authHeader);
 
     const updatedUser = await addEditReminder(
       userId,
@@ -354,7 +364,8 @@ exports.addEditPrivateReminder = async (req, res, next) => {
       end,
       type,
       active,
-      done
+      done,
+      doneDates
     );
 
     return res.status(200).json({

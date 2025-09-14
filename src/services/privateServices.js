@@ -330,7 +330,8 @@ exports.addEditReminder = async (
   end,
   type,
   active,
-  done
+  done,
+  doneDates = [] // default array dacă nu vine nimic din frontend
 ) => {
   try {
     const user = await User.findById(userId);
@@ -349,7 +350,7 @@ exports.addEditReminder = async (
         type,
         active,
         done,
-        doneDates: done ? [today] : [],
+        doneDates: done ? [today] : doneDates, // ✅ folosim ce vine sau îl inițializăm
       });
     } else {
       // Reminder existent
@@ -364,9 +365,14 @@ exports.addEditReminder = async (
       reminder.type = type;
       reminder.active = active;
 
+      // ✅ adaugăm întotdeauna array-ul actualizat (din frontend sau inițializat)
+      reminder.doneDates = doneDates;
+
       // Update done logic
       if (done) {
-        if (!reminder.doneDates.includes(today)) reminder.doneDates.push(today);
+        if (!reminder.doneDates.includes(today)) {
+          reminder.doneDates.push(today);
+        }
         reminder.done = true;
       } else {
         reminder.done = false;

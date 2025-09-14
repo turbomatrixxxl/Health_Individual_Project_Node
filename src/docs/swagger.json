@@ -1138,7 +1138,12 @@
                   "end": { "type": "string", "example": "10:00" },
                   "type": { "type": "string", "example": "meal" },
                   "active": { "type": "boolean", "example": false },
-                  "done": { "type": "boolean", "example": false }
+                  "done": { "type": "boolean", "example": false },
+                  "doneDates": {
+                    "type": "array",
+                    "items": { "type": "string", "example": "2025-09-14" },
+                    "description": "Dates when the reminder was marked as done"
+                  }
                 },
                 "required": ["text", "time"]
               }
