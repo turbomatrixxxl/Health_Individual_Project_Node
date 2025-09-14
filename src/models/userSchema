@@ -5,13 +5,14 @@ const gravatar = require('gravatar');
 
 const reminderSchema = new mongoose.Schema({
   text: { type: String, required: true },
-  time: { type: String, required: true }, // "19:00"
-  end: { type: String }, // "23:00"
-  repeat: { type: String, default: 'noRepeat' }, // ex: "2 hours"
-  type: { type: String, required: true }, // "sleep", "exercise", etc.
+  time: { type: String, required: true },
+  end: { type: String },
+  repeat: { type: String, default: 'noRepeat' },
+  type: { type: String, required: true },
   active: { type: Boolean, default: false },
   done: { type: Boolean, default: false },
-  frequency: { type: mongoose.Schema.Types.Mixed, required: true }, // "daily" | "2025-09-20" | ["Mo","We"] | "15 monthly"
+  frequency: { type: mongoose.Schema.Types.Mixed, required: true },
+  doneDates: { type: [String], default: [] },
 });
 
 const userSchema = new mongoose.Schema(
@@ -126,6 +127,7 @@ const userSchema = new mongoose.Schema(
           type: 'meal',
           active: false,
           done: false,
+          doneDates: [],
         },
         {
           text: 'Take lunch',
@@ -136,6 +138,7 @@ const userSchema = new mongoose.Schema(
           type: 'meal',
           active: false,
           done: false,
+          doneDates: [],
         },
         {
           text: 'Take dinner',
@@ -146,6 +149,7 @@ const userSchema = new mongoose.Schema(
           type: 'meal',
           active: false,
           done: false,
+          doneDates: [],
         },
         {
           text: 'Go to sleep',
@@ -156,6 +160,7 @@ const userSchema = new mongoose.Schema(
           type: 'sleep',
           active: false,
           done: false,
+          doneDates: [],
         },
         {
           text: 'Wake up',
@@ -166,6 +171,7 @@ const userSchema = new mongoose.Schema(
           type: 'sleep',
           active: false,
           done: false,
+          doneDates: [],
         },
         {
           text: 'Record Breakfast meal',
@@ -176,6 +182,7 @@ const userSchema = new mongoose.Schema(
           type: 'meal',
           active: false,
           done: false,
+          doneDates: [],
           link: '/diary',
         },
         {
@@ -187,6 +194,7 @@ const userSchema = new mongoose.Schema(
           type: 'meal',
           active: false,
           done: false,
+          doneDates: [],
           link: '/diary',
         },
         {
@@ -198,6 +206,7 @@ const userSchema = new mongoose.Schema(
           type: 'meal',
           active: false,
           done: false,
+          doneDates: [],
           link: '/diary',
         },
         {
@@ -209,6 +218,7 @@ const userSchema = new mongoose.Schema(
           type: 'sleep',
           active: false,
           done: false,
+          doneDates: [],
           link: '/sleep',
         },
         {
@@ -220,6 +230,7 @@ const userSchema = new mongoose.Schema(
           type: 'metrix',
           active: false,
           done: false,
+          doneDates: [],
           link: '/metrix',
         },
         {
@@ -231,6 +242,7 @@ const userSchema = new mongoose.Schema(
           type: 'exercise',
           active: false,
           done: false,
+          doneDates: [],
           link: '/physical',
         },
         {
@@ -242,6 +254,7 @@ const userSchema = new mongoose.Schema(
           type: 'water',
           active: false,
           done: false,
+          doneDates: [],
         },
       ],
     },

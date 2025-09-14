@@ -1153,6 +1153,19 @@
         }
       }
     },
+    "/api/private/reminders/refresh": {
+      "get": {
+        "summary": "Refresh done state of reminders for the user",
+        "tags": ["Reminders"],
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Reminders refreshed successfully" },
+          "400": { "description": "Invalid input" },
+          "401": { "description": "Unauthorized" },
+          "500": { "description": "Internal server error" }
+        }
+      }
+    },
     "/api/private/reminders/{id}": {
       "delete": {
         "summary": "Delete a reminder for the user",
@@ -1242,14 +1255,29 @@
             "example": "Morning meal reminder to start the day with energy"
           },
           "time": { "type": "string", "example": "06:00" },
+          "frequency": {
+            "oneOf": [
+              { "type": "string", "example": "daily" },
+              {
+                "type": "array",
+                "items": { "type": "string" },
+                "example": ["Mo", "We"]
+              }
+            ]
+          },
           "end": { "type": "string", "example": "10:00" },
           "repeat": { "type": "string", "example": "noRepeat" },
           "type": { "type": "string", "example": "meal" },
           "active": { "type": "boolean", "example": false },
           "done": { "type": "boolean", "example": false },
-          "frequency": {
-            "type": ["string", "array"],
-            "example": "daily"
+          "doneDates": {
+            "type": "array",
+            "description": "List of dates (YYYY-MM-DD) on which the reminder was marked as done",
+            "items": {
+              "type": "string",
+              "format": "date",
+              "example": "2025-09-14"
+            }
           },
           "link": { "type": "string", "example": "/diary" }
         }

@@ -55,6 +55,12 @@ router.post(
   privateController.addEditPrivateReminder
 );
 
+router.get(
+  '/private/reminders/refresh',
+  authMiddleware,
+  privateController.refreshPrivateDoneReminders
+);
+
 router.delete(
   '/private/reminders/:id',
   authMiddleware,

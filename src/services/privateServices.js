@@ -1,5 +1,6 @@
 const Health = require('../models/healthSchema');
 const User = require('../models/userSchema');
+const moment = require('moment');
 
 exports.getCategoriesForBloodGroup = async (
   userId,
@@ -335,7 +336,10 @@ exports.addEditReminder = async (
     const user = await User.findById(userId);
     if (!user) throw new Error('User not found');
 
+    const today = moment().format('YYYY-MM-DD');
+
     if (!id) {
+      // Reminder nou
       user.reminders.push({
         text,
         time,
@@ -345,8 +349,10 @@ exports.addEditReminder = async (
         type,
         active,
         done,
+        doneDates: done ? [today] : [],
       });
     } else {
+      // Reminder existent
       const reminder = user.reminders.find((rem) => rem._id.toString() === id);
       if (!reminder) throw new Error('Failed to find Reminder !');
 
@@ -357,13 +363,70 @@ exports.addEditReminder = async (
       reminder.end = end;
       reminder.type = type;
       reminder.active = active;
-      reminder.done = done;
+
+      // Update done logic
+      if (done) {
+        if (!reminder.doneDates.includes(today)) reminder.doneDates.push(today);
+        reminder.done = true;
+      } else {
+        reminder.done = false;
+      }
     }
 
     await user.save();
     return user;
   } catch (error) {
     throw new Error(error.message || 'Failed to add/edit reminder !');
+  }
+};
+
+exports.refreshDoneReminders = async (userId) => {
+  try {
+    const user = await User.findById(userId);
+    if (!user) throw new Error('User not found');
+
+    const today = moment().format('YYYY-MM-DD');
+    const todayDay2 = moment().format('dd'); // "Mo", "Tu", ...
+    const currentWeek = moment().week();
+    const currentMonth = moment().month() + 1;
+
+    user.reminders.forEach((reminder) => {
+      const freq = reminder.frequency;
+
+      // Daily
+      if (freq === 'daily') {
+        if (!reminder.doneDates.includes(today)) {
+          reminder.done = false;
+        }
+      }
+
+      // Weekly (array de zile, ex: ["Su","Mo","Fr"])
+      else if (Array.isArray(freq)) {
+        if (freq.includes(todayDay2)) {
+          const lastDone = reminder.doneDates.length
+            ? moment(reminder.doneDates[reminder.doneDates.length - 1])
+            : null;
+          if (!lastDone || lastDone.week() !== currentWeek) {
+            reminder.done = false;
+          }
+        }
+      }
+
+      // Monthly (ex: "15 monthly")
+      else if (typeof freq === 'string' && freq.includes('monthly')) {
+        const lastDone = reminder.doneDates.length
+          ? moment(reminder.doneDates[reminder.doneDates.length - 1])
+          : null;
+        if (!lastDone || lastDone.month() + 1 !== currentMonth) {
+          reminder.done = false;
+        }
+      }
+    });
+
+    await user.save();
+    return user;
+  } catch (error) {
+    throw new Error(error.message || 'Failed to refresh reminders!');
   }
 };
 
