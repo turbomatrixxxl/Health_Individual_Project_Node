@@ -293,8 +293,8 @@ exports.setHeartDailyRegistrations = async (
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const todayHeart = user.heart.find((sl) => {
-      const heartDate = new Date(sl.date);
+    const todayHeart = user.heart.find((hr) => {
+      const heartDate = new Date(hr.date);
       heartDate.setHours(0, 0, 0, 0);
       return today.getTime() === heartDate.getTime();
     });
