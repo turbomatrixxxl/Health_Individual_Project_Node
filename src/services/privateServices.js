@@ -399,7 +399,10 @@ exports.refreshDoneReminders = async (userId) => {
 
     user.reminders.forEach((reminder) => {
       const freq = reminder.frequency;
-      const repeatHours = reminder.repeat || 0;
+      const repeatHours =
+        reminder.repeat && reminder.repeat !== 'noRepeat'
+          ? parseInt(reminder.repeat)
+          : null;
 
       // Helper: ultima bifare
       const lastDone =
