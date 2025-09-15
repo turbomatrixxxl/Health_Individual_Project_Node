@@ -337,7 +337,7 @@ exports.addEditReminder = async (
     const user = await User.findById(userId);
     if (!user) throw new Error('User not found');
 
-    const today = moment().local().format('YYYY-MM-DD');
+    const today = moment().local().format('YYYY-MM-DD.mm');
 
     if (!id) {
       // Reminder nou
@@ -391,40 +391,79 @@ exports.refreshDoneReminders = async (userId) => {
     const user = await User.findById(userId);
     if (!user) throw new Error('User not found');
 
-    const today = moment().format('YYYY-MM-DD');
-    const todayDay2 = moment().format('dd'); // "Mo", "Tu", ...
-    const currentWeek = moment().week();
-    const currentMonth = moment().month() + 1;
+    const now = moment();
+    const todayStr = now.format('YYYY-MM-DD');
+    const todayDay2 = now.format('dd'); // "Mo", "Tu", etc
+    const currentWeek = now.week();
+    const currentMonth = now.month() + 1;
 
     user.reminders.forEach((reminder) => {
       const freq = reminder.frequency;
+      const repeatHours = reminder.repeat || 0;
 
-      // Daily
+      // Helper: ultima bifare
+      const lastDone =
+        reminder.doneDates && reminder.doneDates.length
+          ? moment(reminder.doneDates[reminder.doneDates.length - 1])
+          : null;
+
+      // DAILY
       if (freq === 'daily') {
-        if (!reminder.doneDates.includes(today)) {
-          reminder.done = false;
-        }
-      }
-
-      // Weekly (array de zile, ex: ["Su","Mo","Fr"])
-      else if (Array.isArray(freq)) {
-        if (freq.includes(todayDay2)) {
-          const lastDone = reminder.doneDates.length
-            ? moment(reminder.doneDates[reminder.doneDates.length - 1])
-            : null;
-          if (!lastDone || lastDone.week() !== currentWeek) {
+        if (repeatHours > 0) {
+          if (!lastDone || now.diff(lastDone, 'hours') >= repeatHours) {
+            reminder.done = false;
+          }
+        } else {
+          // fără repeat: resetează doar în ziua curentă dacă nu a fost bifat
+          if (!lastDone || lastDone.format('YYYY-MM-DD') !== todayStr) {
             reminder.done = false;
           }
         }
       }
 
-      // Monthly (ex: "15 monthly")
+      // WEEKLY (array de zile, ex: ["Mo", "We", "Fr"])
+      else if (Array.isArray(freq)) {
+        if (freq.includes(todayDay2)) {
+          if (repeatHours > 0) {
+            if (!lastDone || now.diff(lastDone, 'hours') >= repeatHours) {
+              reminder.done = false;
+            }
+          } else {
+            if (!lastDone || lastDone.week() !== currentWeek) {
+              reminder.done = false;
+            }
+          }
+        }
+      }
+
+      // MONTHLY (ex: "15 monthly")
       else if (typeof freq === 'string' && freq.includes('monthly')) {
-        const lastDone = reminder.doneDates.length
-          ? moment(reminder.doneDates[reminder.doneDates.length - 1])
-          : null;
-        if (!lastDone || lastDone.month() + 1 !== currentMonth) {
-          reminder.done = false;
+        const dayOfMonth = parseInt(freq, 10);
+        if (now.date() === dayOfMonth) {
+          if (repeatHours > 0) {
+            if (!lastDone || now.diff(lastDone, 'hours') >= repeatHours) {
+              reminder.done = false;
+            }
+          } else {
+            if (!lastDone || lastDone.month() + 1 !== currentMonth) {
+              reminder.done = false;
+            }
+          }
+        }
+      }
+
+      // FIXED DATE (YYYY-MM-DD)
+      else if (/^\d{4}-\d{2}-\d{2}$/.test(freq)) {
+        if (now.format('YYYY-MM-DD') === freq) {
+          if (repeatHours > 0) {
+            if (!lastDone || now.diff(lastDone, 'hours') >= repeatHours) {
+              reminder.done = false;
+            }
+          } else {
+            if (!lastDone || lastDone.format('YYYY-MM-DD') !== freq) {
+              reminder.done = false;
+            }
+          }
         }
       }
     });
