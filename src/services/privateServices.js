@@ -402,71 +402,66 @@ exports.refreshDoneReminders = async (userId) => {
       const repeatHours =
         reminder.repeat && reminder.repeat !== 'noRepeat'
           ? parseInt(reminder.repeat)
-          : null;
+          : 0;
 
-      // Helper: ultima bifare
-      const lastDone =
-        reminder.doneDates && reminder.doneDates.length
-          ? moment(reminder.doneDates[reminder.doneDates.length - 1])
-          : null;
+      reminder.doneDates = reminder.doneDates || [];
+      const lastDone = reminder.doneDates.length
+        ? moment(reminder.doneDates[reminder.doneDates.length - 1])
+        : null;
+
+      const shouldReset = () => {
+        if (!lastDone) return true;
+        if (repeatHours > 0) return now.diff(lastDone, 'hours') >= repeatHours;
+        return false;
+      };
 
       // DAILY
       if (freq === 'daily') {
-        if (repeatHours > 0) {
-          if (!lastDone || now.diff(lastDone, 'hours') >= repeatHours) {
-            reminder.done = false;
-          }
-        } else {
-          // fără repeat: resetează doar în ziua curentă dacă nu a fost bifat
-          if (!lastDone || lastDone.format('YYYY-MM-DD') !== todayStr) {
-            reminder.done = false;
-          }
+        if (
+          repeatHours > 0
+            ? shouldReset()
+            : !lastDone || lastDone.format('YYYY-MM-DD') !== todayStr
+        ) {
+          reminder.done = false;
         }
       }
 
-      // WEEKLY (array de zile, ex: ["Mo", "We", "Fr"])
-      else if (Array.isArray(freq)) {
-        if (freq.includes(todayDay2)) {
-          if (repeatHours > 0) {
-            if (!lastDone || now.diff(lastDone, 'hours') >= repeatHours) {
-              reminder.done = false;
-            }
-          } else {
-            if (!lastDone || lastDone.week() !== currentWeek) {
-              reminder.done = false;
-            }
-          }
+      // WEEKLY
+      else if (Array.isArray(freq) && freq.includes(todayDay2)) {
+        if (
+          repeatHours > 0
+            ? shouldReset()
+            : !lastDone || lastDone.week() !== currentWeek
+        ) {
+          reminder.done = false;
         }
       }
 
-      // MONTHLY (ex: "15 monthly")
+      // MONTHLY
       else if (typeof freq === 'string' && freq.includes('monthly')) {
         const dayOfMonth = parseInt(freq, 10);
         if (now.date() === dayOfMonth) {
-          if (repeatHours > 0) {
-            if (!lastDone || now.diff(lastDone, 'hours') >= repeatHours) {
-              reminder.done = false;
-            }
-          } else {
-            if (!lastDone || lastDone.month() + 1 !== currentMonth) {
-              reminder.done = false;
-            }
+          if (
+            repeatHours > 0
+              ? shouldReset()
+              : !lastDone || lastDone.month() + 1 !== currentMonth
+          ) {
+            reminder.done = false;
           }
         }
       }
 
-      // FIXED DATE (YYYY-MM-DD)
-      else if (/^\d{4}-\d{2}-\d{2}$/.test(freq)) {
-        if (now.format('YYYY-MM-DD') === freq) {
-          if (repeatHours > 0) {
-            if (!lastDone || now.diff(lastDone, 'hours') >= repeatHours) {
-              reminder.done = false;
-            }
-          } else {
-            if (!lastDone || lastDone.format('YYYY-MM-DD') !== freq) {
-              reminder.done = false;
-            }
-          }
+      // FIXED DATE
+      else if (
+        /^\d{4}-\d{2}-\d{2}$/.test(freq) &&
+        now.format('YYYY-MM-DD') === freq
+      ) {
+        if (
+          repeatHours > 0
+            ? shouldReset()
+            : !lastDone || lastDone.format('YYYY-MM-DD') !== freq
+        ) {
+          reminder.done = false;
         }
       }
     });
