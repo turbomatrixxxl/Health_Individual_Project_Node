@@ -1301,13 +1301,26 @@
       },
       "Sleep": {
         "type": "object",
-        "description": "Represents the sleep duration in hours logged by a user.",
+        "description": "Represents the sleep data logged by a user for a specific date, including one or more sleep intervals.",
         "properties": {
-          "quantity": { "type": "integer", "example": 8 },
           "date": {
             "type": "string",
-            "format": "date-time",
-            "example": "2025-09-11T23:00:00Z"
+            "format": "date",
+            "example": "2025-09-11"
+          },
+          "interval": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "fromHour": { "type": "string", "example": "10" },
+                "fromMinute": { "type": "string", "example": "25" },
+                "fromAmPm": { "type": "string", "example": "PM" },
+                "tillHour": { "type": "string", "example": "06" },
+                "tillMinute": { "type": "string", "example": "00" },
+                "tillAmPm": { "type": "string", "example": "AM" }
+              }
+            }
           }
         }
       },
@@ -1322,6 +1335,11 @@
             "type": "string",
             "format": "date-time",
             "example": "2025-09-12T07:30:00Z"
+          },
+          "time": {
+            "type": "string",
+            "format": "time",
+            "example": "07:30:00"
           }
         }
       },

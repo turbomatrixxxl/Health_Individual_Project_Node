@@ -246,7 +246,7 @@ exports.setStepsDailyRegistrations = async (userId, totalSteps) => {
   }
 };
 
-exports.setSleepDailyRegistrations = async (userId, hours) => {
+exports.setSleepDailyRegistrations = async (userId, date, interval) => {
   try {
     // Find the user
     const user = await User.findById(userId);
@@ -254,19 +254,19 @@ exports.setSleepDailyRegistrations = async (userId, hours) => {
       throw new Error('User not found');
     }
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const sleepDate = new Date(date);
+    sleepDate.setHours(0, 0, 0, 0);
 
-    const todaySleep = user.sleep.find((sl) => {
-      const sleepDate = new Date(sl.date);
-      sleepDate.setHours(0, 0, 0, 0);
-      return today.getTime() === sleepDate.getTime();
+    const sleepToSet = user.sleep.find((sl) => {
+      const slDate = new Date(sl.date);
+      slDate.setHours(0, 0, 0, 0);
+      return slDate.getTime() === sleepDate.getTime();
     });
 
-    if (!todaySleep) {
-      user.sleep.push({ quantity: hours, date: new Date() });
+    if (!sleepToSet) {
+      user.sleep.push({ interval: [...interval], date: sleepDate });
     } else {
-      todaySleep.quantity = hours;
+      sleepToSet.interval = [...interval];
     }
 
     await user.save();
@@ -281,7 +281,8 @@ exports.setHeartDailyRegistrations = async (
   userId,
   systolic,
   diastolic,
-  pulse
+  pulse,
+  time
 ) => {
   try {
     // Find the user
@@ -305,11 +306,13 @@ exports.setHeartDailyRegistrations = async (
         diastolic: diastolic,
         pulse: pulse,
         date: new Date(),
+        time: time ?? '00:00:00',
       });
     } else {
       todayHeart.systolic = systolic;
       todayHeart.diastolic = diastolic;
       todayHeart.pulse = pulse;
+      todayHeart.time = time;
     }
 
     await user.save();

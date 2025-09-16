@@ -103,8 +103,17 @@ const userSchema = new mongoose.Schema(
     ],
     sleep: [
       {
-        quantity: { type: Number, required: true },
         date: { type: Date, required: true },
+        interval: [
+          {
+            fromHour: { type: String, default: '00' },
+            fromMinute: { type: String, default: '00' },
+            fromAmPm: { type: String, default: 'AM' },
+            tillHour: { type: String, default: '00' },
+            tillMinute: { type: String, default: '00' },
+            tillAmPm: { type: String, default: 'AM' },
+          },
+        ],
       },
     ],
     heart: [
@@ -113,6 +122,7 @@ const userSchema = new mongoose.Schema(
         diastolic: { type: Number, required: true },
         pulse: { type: Number, required: true },
         date: { type: Date, required: true },
+        time: { type: String, default: '00:00:00' },
       },
     ],
     reminders: {

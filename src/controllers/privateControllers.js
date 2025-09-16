@@ -11,6 +11,7 @@ const {
   refreshDoneReminders,
 } = require('../services/privateServices');
 const { extractUserId } = require('../middlewares/extractUserId');
+const { object } = require('joi');
 
 exports.getPrivateCategoriesForBloodGroup = async (req, res, next) => {
   const { height, desiredWeight, age, bloodGroupIndex, currentWeight } =
@@ -235,14 +236,20 @@ exports.setPrivateStepsDailyRegistrations = async (req, res, next) => {
 
 exports.setPrivateSleepDailyRegistrations = async (req, res, next) => {
   try {
-    const { hours } = req.body;
+    const { date, interval } = req.body;
 
     // Validate input
-    if (!hours || hours < 0) {
+    if (!Array.isArray(interval) || interval.length === 0) {
       return res.status(400).json({
         status: 'error',
-        message:
-          'Invalid input. Please provide total sleep hours and a valid quantity.',
+        message: 'Invalid input. Please provide a valid registration interval.',
+      });
+    }
+
+    if (!date || isNaN(new Date(date).getTime())) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Invalid input. Please provide a valid date.',
       });
     }
 
@@ -258,11 +265,15 @@ exports.setPrivateSleepDailyRegistrations = async (req, res, next) => {
     const userId = extractUserId(authHeader); // Assuming this utility extracts user ID from token
 
     // Call the service to add the consumed product
-    const updatedUser = await setSleepDailyRegistrations(userId, hours);
+    const updatedUser = await setSleepDailyRegistrations(
+      userId,
+      date,
+      interval
+    );
 
     return res.status(200).json({
       status: 'success',
-      message: 'Sleep hours updated for today!',
+      message: 'Sleep hours updated !',
       user: updatedUser,
     });
   } catch (error) {
@@ -272,7 +283,7 @@ exports.setPrivateSleepDailyRegistrations = async (req, res, next) => {
 
 exports.setPrivateHeartDailyRegistrations = async (req, res, next) => {
   try {
-    const { systolic, diastolic, pulse } = req.body;
+    const { systolic, diastolic, pulse, time } = req.body;
 
     // Validate input
     if (
@@ -306,7 +317,8 @@ exports.setPrivateHeartDailyRegistrations = async (req, res, next) => {
       userId,
       systolic,
       diastolic,
-      pulse
+      pulse,
+      time
     );
 
     return res.status(200).json({
