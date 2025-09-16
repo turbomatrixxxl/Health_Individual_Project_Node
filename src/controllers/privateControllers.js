@@ -11,7 +11,6 @@ const {
   refreshDoneReminders,
 } = require('../services/privateServices');
 const { extractUserId } = require('../middlewares/extractUserId');
-const { object } = require('joi');
 
 exports.getPrivateCategoriesForBloodGroup = async (req, res, next) => {
   const { height, desiredWeight, age, bloodGroupIndex, currentWeight } =
