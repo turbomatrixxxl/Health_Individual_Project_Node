@@ -198,14 +198,20 @@ exports.getConsumedInfoForSpecificDay = async (req, res) => {
 
 exports.setPrivateStepsDailyRegistrations = async (req, res, next) => {
   try {
-    const { totalSteps } = req.body;
+    const { date, interval } = req.body;
 
     // Validate input
-    if (!totalSteps || totalSteps < 0) {
+    if (!Array.isArray(interval) || interval.length === 0) {
       return res.status(400).json({
         status: 'error',
-        message:
-          'Invalid input. Please provide total steps and a valid quantity.',
+        message: 'Invalid input. Please provide a valid registration interval.',
+      });
+    }
+
+    if (!date || isNaN(new Date(date).getTime())) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Invalid input. Please provide a valid date.',
       });
     }
 
@@ -221,11 +227,15 @@ exports.setPrivateStepsDailyRegistrations = async (req, res, next) => {
     const userId = extractUserId(authHeader); // Assuming this utility extracts user ID from token
 
     // Call the service to add the consumed product
-    const updatedUser = await setStepsDailyRegistrations(userId, totalSteps);
+    const updatedUser = await setStepsDailyRegistrations(
+      userId,
+      date,
+      interval
+    );
 
     return res.status(200).json({
       status: 'success',
-      message: 'Steps updated for today!',
+      message: 'Exercises updated',
       user: updatedUser,
     });
   } catch (error) {

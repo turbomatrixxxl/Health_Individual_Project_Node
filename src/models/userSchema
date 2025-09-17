@@ -97,8 +97,15 @@ const userSchema = new mongoose.Schema(
     ],
     steps: [
       {
-        quantity: { type: Number, required: true },
         date: { type: Date, required: true },
+        interval: [
+          {
+            exerciseType: { type: String, required: true, default: 'walking' },
+            minutes: { type: String, required: true, default: '00' },
+            intensity: { type: String, required: true, default: 'min' },
+            steps: { type: Number, required: true, default: 0 },
+          },
+        ],
       },
     ],
     sleep: [

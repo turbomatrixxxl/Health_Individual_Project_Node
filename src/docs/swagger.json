@@ -1287,38 +1287,57 @@
           "link": { "type": "string", "example": "/diary" }
         }
       },
-      "Step": {
-        "type": "object",
-        "description": "Tracks the number of steps taken by a user on a specific date.",
-        "properties": {
-          "quantity": { "type": "integer", "example": 5000 },
-          "date": {
-            "type": "string",
-            "format": "date-time",
-            "example": "2025-09-12T08:00:00Z"
-          }
+      "Steps": {
+        "type": "array",
+        "description": "Represents the physical activity data converted in steps logged by a user, grouped by date.",
+        "items": {
+          "type": "object",
+          "properties": {
+            "date": {
+              "type": "string",
+              "format": "date-time",
+              "example": "2025-09-12"
+            },
+            "interval": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "exerciseType": { "type": "string", "example": "walking" },
+                  "minutes": { "type": "string", "example": "25" },
+                  "intensity": { "type": "string", "example": "min" },
+                  "steps": { "type": "number", "example": 1500 }
+                },
+                "required": ["exerciseType", "minutes", "intensity", "steps"]
+              }
+            }
+          },
+          "required": ["date", "interval"]
         }
       },
       "Sleep": {
-        "type": "object",
+        "type": "array",
         "description": "Represents the sleep data logged by a user for a specific date, including one or more sleep intervals.",
-        "properties": {
-          "date": {
-            "type": "string",
-            "format": "date",
-            "example": "2025-09-11"
-          },
-          "interval": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "fromHour": { "type": "string", "example": "10" },
-                "fromMinute": { "type": "string", "example": "25" },
-                "fromAmPm": { "type": "string", "example": "PM" },
-                "tillHour": { "type": "string", "example": "06" },
-                "tillMinute": { "type": "string", "example": "00" },
-                "tillAmPm": { "type": "string", "example": "AM" }
+        "items": {
+          "type": "object",
+          "properties": {
+            "date": {
+              "type": "string",
+              "format": "date",
+              "example": "2025-09-11"
+            },
+            "interval": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "fromHour": { "type": "string", "example": "10" },
+                  "fromMinute": { "type": "string", "example": "25" },
+                  "fromAmPm": { "type": "string", "example": "PM" },
+                  "tillHour": { "type": "string", "example": "06" },
+                  "tillMinute": { "type": "string", "example": "00" },
+                  "tillAmPm": { "type": "string", "example": "AM" }
+                }
               }
             }
           }

@@ -215,7 +215,7 @@ exports.getConsumedInfoForDate = async (userId, date) => {
   }
 };
 
-exports.setStepsDailyRegistrations = async (userId, totalSteps) => {
+exports.setStepsDailyRegistrations = async (userId, date, interval) => {
   try {
     // Find the user
     const user = await User.findById(userId);
@@ -223,26 +223,28 @@ exports.setStepsDailyRegistrations = async (userId, totalSteps) => {
       throw new Error('User not found');
     }
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const stepsDate = new Date(date);
+    stepsDate.setHours(0, 0, 0, 0);
 
-    const todaySteps = user.steps.find((step) => {
-      const stepsDate = new Date(step.date);
+    const stepsToset = user.steps.find((step) => {
+      const stepsDateToSet = new Date(step.date);
       stepsDate.setHours(0, 0, 0, 0);
-      return today.getTime() === stepsDate.getTime();
+      return stepsDate.getTime() === stepsDateToSet.getTime();
     });
 
-    if (!todaySteps) {
-      user.steps.push({ quantity: totalSteps, date: new Date() });
+    if (!stepsToset) {
+      user.steps.push({ interval: [...interval], date: stepsDate });
     } else {
-      todaySteps.quantity = totalSteps;
+      stepsToset.interval = [...interval];
     }
 
     await user.save();
 
     return user;
   } catch (error) {
-    throw new Error(error.message || 'Failed to set Steps for today !');
+    throw new Error(
+      error.message || 'Failed to set Exercises interval for selected date!'
+    );
   }
 };
 
@@ -273,7 +275,9 @@ exports.setSleepDailyRegistrations = async (userId, date, interval) => {
 
     return user;
   } catch (error) {
-    throw new Error(error.message || 'Failed to set Sleep hours for today !');
+    throw new Error(
+      error.message || 'Failed to set Sleep hours interval for selected date!'
+    );
   }
 };
 
