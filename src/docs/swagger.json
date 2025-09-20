@@ -1194,6 +1194,93 @@
           "500": { "description": "Internal server error" }
         }
       }
+    },
+    "/api/private/reports": {
+      "post": {
+        "summary": "Add or update a report for the user in a specific period of time",
+        "tags": ["Reports"],
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "report": {
+                    "$ref": "#/components/schemas/Report"
+                  }
+                },
+                "required": ["report"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Report added or updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/private/reports/{id}": {
+      "delete": {
+        "summary": "Delete a report by its ID for the authenticated user",
+        "tags": ["Reports"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the report to delete",
+            "schema": {
+              "type": "string",
+              "example": "64c3f83b91a2f9e7b5a6d321"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Report deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid report ID"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Report not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1362,6 +1449,76 @@
           }
         }
       },
+      "Report": {
+        "type": "object",
+        "description": "Stores a generated health report for a user over a specific date range.",
+        "properties": {
+          "_id": { "type": "string", "example": "64c3f83b91a2f9e7b5a6d321" },
+          "from": {
+            "type": "string",
+            "format": "date",
+            "example": "2025-09-01"
+          },
+          "till": {
+            "type": "string",
+            "format": "date",
+            "example": "2025-09-07"
+          },
+          "name": { "type": "string", "example": "John Doe" },
+          "age": { "type": "integer", "example": 30 },
+          "height": { "type": "integer", "example": 180 },
+          "weight": { "type": "integer", "example": 80 },
+          "desiredWeight": { "type": "integer", "example": 75 },
+          "bloodType": { "type": "integer", "example": 2 },
+          "caloriesRecommended": { "type": "integer", "example": 2000 },
+          "stepsRecommended": { "type": "integer", "example": 8000 },
+          "sleepRecommended": { "type": "integer", "example": 8 },
+          "systolicRecommended": { "type": "integer", "example": 120 },
+          "diastolicRecommended": { "type": "integer", "example": 80 },
+          "pulseRecommended": { "type": "integer", "example": 70 },
+          "dates": {
+            "type": "array",
+            "description": "Daily health metrics included in this report.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "date": {
+                  "type": "string",
+                  "format": "date",
+                  "example": "2025-09-01"
+                },
+                "calories": { "type": "integer", "example": 1950 },
+                "steps": { "type": "integer", "example": 8500 },
+                "sleep": { "type": "integer", "example": 7 },
+                "systolic": { "type": "integer", "example": 118 },
+                "diastolic": { "type": "integer", "example": 79 },
+                "pulse": { "type": "integer", "example": 72 }
+              },
+              "required": [
+                "date",
+                "calories",
+                "steps",
+                "sleep",
+                "systolic",
+                "diastolic",
+                "pulse"
+              ]
+            }
+          }
+        },
+        "required": [
+          "from",
+          "till",
+          "name",
+          "caloriesRecommended",
+          "stepsRecommended",
+          "sleepRecommended",
+          "systolicRecommended",
+          "diastolicRecommended",
+          "pulseRecommended",
+          "dates"
+        ]
+      },
       "ConsumedProduct": {
         "type": "object",
         "description": "Represents a consumed food product, its nutritional data, and the consumption date.",
@@ -1417,7 +1574,7 @@
           "steps": {
             "type": "array",
             "description": "List of recorded steps per day.",
-            "items": { "$ref": "#/components/schemas/Step" }
+            "items": { "$ref": "#/components/schemas/Steps" }
           },
           "sleep": {
             "type": "array",
@@ -1433,6 +1590,11 @@
             "type": "array",
             "description": "List of reminders configured or assigned to the user.",
             "items": { "$ref": "#/components/schemas/Reminder" }
+          },
+          "reports": {
+            "type": "array",
+            "description": "List of reports configured or assigned to the user.",
+            "items": { "$ref": "#/components/schemas/Report" }
           }
         }
       }

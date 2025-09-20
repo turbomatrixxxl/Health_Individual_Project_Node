@@ -493,3 +493,45 @@ exports.deleteReminder = async (userId, id) => {
     throw new Error(error.message || 'Failed to delete reminder !');
   }
 };
+
+exports.addUpdateReport = async (userId, report) => {
+  try {
+    const user = await User.findById(userId);
+    if (!user) throw new Error('User not found');
+
+    const normalizeDate = (d) => new Date(d).toISOString().split('T')[0];
+    const reportFromDate = normalizeDate(report.from);
+    const reportTillDate = normalizeDate(report.till);
+
+    const existingReport = user.reports.find(
+      (rep) =>
+        normalizeDate(rep.from) === reportFromDate &&
+        normalizeDate(rep.till) === reportTillDate
+    );
+
+    if (!existingReport) {
+      user.reports.push(report);
+    } else {
+      Object.assign(existingReport, report);
+    }
+
+    await user.save();
+    return user;
+  } catch (error) {
+    throw new Error(error.message || 'Failed to add/update report!');
+  }
+};
+
+exports.deleteReport = async (userId, id) => {
+  try {
+    const user = await User.findById(userId);
+    if (!user) throw new Error('User not found');
+
+    user.reports = user.reports.filter((rep) => rep._id.toString() !== id);
+
+    await user.save();
+    return user;
+  } catch (error) {
+    throw new Error(error.message || 'Failed to delete report !');
+  }
+};

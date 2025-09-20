@@ -275,6 +275,35 @@ const userSchema = new mongoose.Schema(
         },
       ],
     },
+    reports: [
+      {
+        from: { type: Date, required: true },
+        till: { type: Date, required: true },
+        name: { type: String, required: true, default: 'User' },
+        age: { type: Number, default: 0 },
+        height: { type: Number, default: 0 },
+        weight: { type: Number, default: 0 },
+        desiredWeight: { type: Number, default: 0 },
+        bloodType: { type: Number, default: 0 },
+        caloriesRecommended: { type: Number, required: true },
+        stepsRecommended: { type: Number, required: true, default: 0 },
+        sleepRecommended: { type: Number, required: true, default: 0 },
+        systolicRecommended: { type: Number, required: true },
+        diastolicRecommended: { type: Number, required: true },
+        pulseRecommended: { type: Number, required: true },
+        dates: [
+          {
+            date: { type: Date, required: true },
+            calories: { type: Number, required: true },
+            steps: { type: Number, required: true, default: 0 },
+            sleep: { type: Number, required: true, default: 0 },
+            systolic: { type: Number, required: true },
+            diastolic: { type: Number, required: true },
+            pulse: { type: Number, required: true },
+          },
+        ],
+      },
+    ],
   },
   { versionKey: false, timestamps: true }
 );

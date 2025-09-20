@@ -9,6 +9,8 @@ const {
   addEditReminder,
   deleteReminder,
   refreshDoneReminders,
+  addUpdateReport,
+  deleteReport,
 } = require('../services/privateServices');
 const { extractUserId } = require('../middlewares/extractUserId');
 
@@ -454,6 +456,76 @@ exports.deletePrivateReminder = async (req, res, next) => {
     return res.status(200).json({
       status: 'success',
       message: 'Reminder deleted succesfully!',
+      user: updatedUser,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.addUpdatePrivateReport = async (req, res, next) => {
+  try {
+    const { report } = req.body;
+
+    if (!report || typeof report !== 'object' || Array.isArray(report)) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Invalid input. Please provide a proper report object.',
+      });
+    }
+
+    // Get the user ID from the request (assuming JWT authentication)
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+      return res.status(401).json({
+        status: 'error',
+        message: 'Missing Authorization header',
+      });
+    }
+
+    const userId = extractUserId(authHeader);
+
+    const updatedUser = await addUpdateReport(userId, report);
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'Report added or updated successfully!',
+      user: updatedUser,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.deletePrivateReport = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    // Validate input
+    if (!id) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'No Report Id !',
+      });
+    }
+
+    // Get the user ID from the request (assuming JWT authentication)
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+      return res.status(401).json({
+        status: 'error',
+        message: 'Missing Authorization header',
+      });
+    }
+
+    const userId = extractUserId(authHeader); // Assuming this utility extracts user ID from token
+
+    // Call the service to add the consumed product
+    const updatedUser = await deleteReport(userId, id);
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'Report deleted succesfully!',
       user: updatedUser,
     });
   } catch (error) {

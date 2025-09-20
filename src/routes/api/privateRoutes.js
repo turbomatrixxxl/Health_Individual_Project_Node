@@ -67,4 +67,16 @@ router.delete(
   privateController.deletePrivateReminder
 );
 
+router.post(
+  '/private/reports',
+  authMiddleware,
+  privateController.addUpdatePrivateReport
+);
+
+router.delete(
+  '/private/reports/:id',
+  authMiddleware,
+  privateController.deletePrivateReport
+);
+
 module.exports = router;
