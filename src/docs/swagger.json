@@ -1476,6 +1476,12 @@
           "systolicRecommended": { "type": "integer", "example": 120 },
           "diastolicRecommended": { "type": "integer", "example": 80 },
           "pulseRecommended": { "type": "integer", "example": 70 },
+          "heartRateMin": { "type": "integer", "example": 60 },
+          "heartRateMax": { "type": "integer", "example": 90 },
+          "systolicMin": { "type": "integer", "example": 70 },
+          "systolicMax": { "type": "integer", "example": 90 },
+          "diastolicMin": { "type": "integer", "example": 120 },
+          "diastolicMax": { "type": "integer", "example": 150 },
           "dates": {
             "type": "array",
             "description": "Daily health metrics included in this report.",

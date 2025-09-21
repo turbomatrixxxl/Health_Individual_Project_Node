@@ -291,6 +291,12 @@ const userSchema = new mongoose.Schema(
         systolicRecommended: { type: Number, required: true },
         diastolicRecommended: { type: Number, required: true },
         pulseRecommended: { type: Number, required: true },
+        heartRateMin: { type: Number, required: true },
+        heartRateMax: { type: Number, required: true },
+        systolicMin: { type: Number, required: true },
+        systolicMax: { type: Number, required: true },
+        diastolicMin: { type: Number, required: true },
+        diastolicMax: { type: Number, required: true },
         dates: [
           {
             date: { type: Date, required: true },
