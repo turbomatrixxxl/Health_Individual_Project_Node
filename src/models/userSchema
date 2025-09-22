@@ -125,6 +125,7 @@ const userSchema = new mongoose.Schema(
     ],
     heart: [
       {
+        weight: { type: Number, required: true },
         systolic: { type: Number, required: true },
         diastolic: { type: Number, required: true },
         pulse: { type: Number, required: true },

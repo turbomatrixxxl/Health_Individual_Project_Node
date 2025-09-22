@@ -294,7 +294,7 @@ exports.setPrivateSleepDailyRegistrations = async (req, res, next) => {
 
 exports.setPrivateHeartDailyRegistrations = async (req, res, next) => {
   try {
-    const { systolic, diastolic, pulse, time } = req.body;
+    const { weight, systolic, diastolic, pulse, time } = req.body;
 
     // Validate input
     if (
@@ -326,6 +326,7 @@ exports.setPrivateHeartDailyRegistrations = async (req, res, next) => {
     // Call the service to add the consumed product
     const updatedUser = await setHeartDailyRegistrations(
       userId,
+      weight,
       systolic,
       diastolic,
       pulse,

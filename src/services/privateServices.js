@@ -283,6 +283,7 @@ exports.setSleepDailyRegistrations = async (userId, date, interval) => {
 
 exports.setHeartDailyRegistrations = async (
   userId,
+  weight,
   systolic,
   diastolic,
   pulse,
@@ -306,6 +307,7 @@ exports.setHeartDailyRegistrations = async (
 
     if (!todayHeart) {
       user.heart.push({
+        weight: weight,
         systolic: systolic,
         diastolic: diastolic,
         pulse: pulse,
@@ -313,6 +315,7 @@ exports.setHeartDailyRegistrations = async (
         time: time ?? '00:00:00',
       });
     } else {
+      todayHeart.weight = weight;
       todayHeart.systolic = systolic;
       todayHeart.diastolic = diastolic;
       todayHeart.pulse = pulse;

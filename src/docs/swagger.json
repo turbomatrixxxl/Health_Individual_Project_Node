@@ -1095,11 +1095,12 @@
               "schema": {
                 "type": "object",
                 "properties": {
+                  "weight": { "type": "number", "example": 100 },
                   "systolic": { "type": "number", "example": 120 },
                   "diastolic": { "type": "number", "example": 80 },
                   "pulse": { "type": "number", "example": 70 }
                 },
-                "required": ["systolic", "diastolic", "pulse"]
+                "required": ["systolic", "diastolic", "pulse", "weight"]
               }
             }
           }
@@ -1434,6 +1435,7 @@
         "type": "object",
         "description": "Stores heart health data including blood pressure and pulse measurements.",
         "properties": {
+          "weight": { "type": "integer", "example": 100 },
           "systolic": { "type": "integer", "example": 120 },
           "diastolic": { "type": "integer", "example": 80 },
           "pulse": { "type": "integer", "example": 70 },
