@@ -28,6 +28,7 @@ const registerUser = async (username, email, password) => {
   user.setPassword(password);
 
   await user.save();
+  
   return user;
 };
 
